@@ -1,0 +1,45 @@
+export class Box {
+  constructor(x, y, width, height, sprite) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.sprite = sprite;
+    this.items = [];
+  }
+
+  addItem(item) {
+    if (this.items.length < 9) {
+      this.items.push(item);
+    }
+  }
+
+  checkCollision(entity) {
+    return (
+      entity.x < this.x + this.width &&
+      entity.x + entity.drawWidth > this.x &&
+      entity.y < this.y + this.height &&
+      entity.y + entity.drawHeight > this.y
+    );
+  }
+
+  draw(ctx, cameraX, cameraY) {
+    const drawX = this.x - cameraX;
+    const drawY = this.y - cameraY;
+
+    ctx.drawImage(this.sprite, drawX, drawY, this.width, this.height);
+
+    const itemSize = 16;
+    const padding = 4;
+    const cols = Math.floor(this.width / (itemSize + padding));
+
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const itemX = drawX + col * (itemSize + padding) + padding / 2;
+      const itemY = drawY + row * (itemSize + padding) + padding / 2;
+      ctx.drawImage(item.sprite, itemX, itemY, itemSize, itemSize);
+    }
+  }
+}

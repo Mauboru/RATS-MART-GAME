@@ -2,8 +2,10 @@ import { useRef, useEffect } from 'react';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { Player } from '../models/Player';
+import { Box } from '../models/Box';
+import { GeneratorObject } from '../hooks/generatorObject';
 
-export function GameCanvas({ backgroundImg, playerImg }) {
+export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, itemImg }) {
   const canvasRef = useRef(null);
   const playerRef = useRef(null);
 
@@ -48,6 +50,17 @@ export function GameCanvas({ backgroundImg, playerImg }) {
     playerRef.current.drawWidth = 64;   
     playerRef.current.drawHeight = 64; 
 
+    const boxes = [
+      new Box(300, 300, 64, 64, boxImg),
+      new Box(400, 300, 64, 64, boxImg),
+      new Box(500, 300, 64, 64, boxImg),
+    ]
+    const generators = [
+      new GeneratorObject(500, 500, 64, 64, generatorImg, itemImg, 200),
+      new GeneratorObject(700, 300, 64, 64, generatorImg, itemImg, 200),
+      new GeneratorObject(200, 200, 64, 64, generatorImg, itemImg, 200),
+    ];
+
     let animationFrameId;
 
     const loop = () => {
@@ -58,6 +71,27 @@ export function GameCanvas({ backgroundImg, playerImg }) {
       } else {
         player.update({ x: 0, y: 0 });
       }
+
+      generators.forEach(generator => generator.update());
+
+      generators.forEach(generator => {
+        generator.generatedItems = generator.generatedItems.filter(item => {
+          if (item.checkCollision(player)) {
+            player.addItem(item);
+            return false; 
+          }
+          return true;
+        });
+      });
+
+      boxes.forEach(box => {
+        if (box.checkCollision(player)) {
+          while (player.items.length > 0 && box.items.length < 9) {
+            const item = player.items.pop();
+            box.addItem(item);
+          }
+        }
+      });
 
       const viewportWidth = canvas.width / (window.devicePixelRatio || 1);
       const viewportHeight = canvas.height / (window.devicePixelRatio || 1);
@@ -78,6 +112,8 @@ export function GameCanvas({ backgroundImg, playerImg }) {
         viewportWidth, viewportHeight
       );
 
+      boxes.forEach(box => box.draw(ctx, cameraX, cameraY));
+      generators.forEach(generator => generator.draw(ctx, cameraX, cameraY));
       player.draw(ctx, cameraX, cameraY);
 
       animationFrameId = requestAnimationFrame(loop);
