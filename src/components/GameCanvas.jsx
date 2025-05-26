@@ -2,6 +2,8 @@ import { useRef, useEffect } from 'react';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { Player } from '../models/Player';
+import { PaymentBox } from '../models/PaymentBox';
+import { Client } from '../models/Client';
 import { Box } from '../models/Box';
 import { GeneratorObject } from '../hooks/generatorObject';
 
@@ -61,6 +63,29 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       new GeneratorObject(200, 200, 64, 64, generatorImg, itemImg, 200),
     ];
 
+    const paymentBox = new PaymentBox(800, 800, 64, 64, boxImg);
+    const clients = [];
+
+    const spawnClient = () => {
+      const targetBoxIndex = Math.floor(Math.random() * 3);
+      const client = new Client(
+        0,
+        0,
+        1,
+        boxes[targetBoxIndex],
+        paymentBox,
+        Math.floor(Math.random() * 3) + 1,
+        playerImg,
+        32,
+        32
+      );
+      clients.push(client);
+    };
+
+    let clientSpawnInterval = setInterval(() => {
+      spawnClient();
+    }, Math.random() * 3000 + 2000);
+  
     let animationFrameId;
 
     const loop = () => {
@@ -73,7 +98,6 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       }
 
       generators.forEach(generator => generator.update());
-
       generators.forEach(generator => {
         generator.generatedItems = generator.generatedItems.filter(item => {
           if (item.checkCollision(player)) {
@@ -92,6 +116,19 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
           }
         }
       });
+      
+      clients.forEach(client => client.update());
+
+      for (let i = clients.length - 1; i >= 0; i--) {
+        if (clients[i].isDone) {
+          clients.splice(i, 1);
+        }
+      }
+
+      if (paymentBox.checkCollision(player)) {
+        player.money += paymentBox.money;
+        paymentBox.money = 0;
+      }
 
       const viewportWidth = canvas.width / (window.devicePixelRatio || 1);
       const viewportHeight = canvas.height / (window.devicePixelRatio || 1);
@@ -114,7 +151,13 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
 
       boxes.forEach(box => box.draw(ctx, cameraX, cameraY));
       generators.forEach(generator => generator.draw(ctx, cameraX, cameraY));
+      paymentBox.draw(ctx, cameraX, cameraY);
+      clients.forEach(client => client.draw(ctx, cameraX, cameraY));
       player.draw(ctx, cameraX, cameraY);
+
+      ctx.fillStyle = 'white';
+      ctx.font = '20px Arial';
+      ctx.fillText(`Dinheiro: $${player.money}`, 65, 30);
 
       animationFrameId = requestAnimationFrame(loop);
     };

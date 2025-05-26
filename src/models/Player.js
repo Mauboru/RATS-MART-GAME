@@ -6,12 +6,15 @@ export class Player {
     this.direction = { x: 0, y: 0 };
     this.state = 'idle';
     this.facing = 'right';
+    this.money = 0;
 
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
     this.frameHeight = frameHeight;
     this.drawWidth = frameWidth; 
     this.drawHeight = frameHeight
+    this.width = this.drawWidth;
+    this.height = this.drawHeight;
     this.currentFrame = 0;
     this.frameCount = 8; 
     this.frameDelay = 6;
