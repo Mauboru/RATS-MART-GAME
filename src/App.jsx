@@ -7,6 +7,7 @@ export default function App() {
   const [boxImg, setBoxImg] = useState(null);
   const [generatorImg, setGeneratorImg] = useState(null);
   const [itemImg, setItemImg] = useState(null);
+  const [spotImage, setSpotImage] = useState(null);
 
   useEffect(() => {
     const bg = new Image();
@@ -28,9 +29,13 @@ export default function App() {
     const item = new Image();
     item.src = './item.png';
     item.onload = () => setItemImg(item);
+
+    const spotImage = new Image();
+    spotImage.src = './spot.png';
+    spotImage.onload = () => setSpotImage(spotImage);
   }, []);
 
-  if (!backgroundImg || !playerImg || !boxImg || !generatorImg || !itemImg) {
+  if (!backgroundImg || !playerImg || !boxImg || !generatorImg || !itemImg || !spotImage) {
     return <div>Carregando imagens...</div>;
   }
 
@@ -41,6 +46,7 @@ export default function App() {
       boxImg={boxImg}
       generatorImg={generatorImg}
       itemImg={itemImg}
+      spotImage={spotImage}
     />
   );
 }

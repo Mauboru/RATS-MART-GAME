@@ -25,18 +25,30 @@ export class Client {
     this.frameTimer = 0;
 
     this.facing = 'right';
+
+    this.collectDelay = 300; // tempo (ms) para pegar um item
+    this.lastCollectTime = 0;
   }
 
-  update() {
+  update(currentTime = performance.now()) {
     if (this.state === 'goingToBox') {
       this.moveTo(this.targetBox);
       if (this.checkCollision(this.targetBox)) {
         this.state = 'waiting';
       }
     } else if (this.state === 'waiting') {
-      while (this.targetBox.items.length > 0 && this.items.length < this.requiredItems) {
+      if (this.waitPos) {
+        this.moveTo(this.waitPos);
+      }
+      // coleta lenta: pega 1 item a cada collectDelay ms
+      if (
+        this.targetBox.items.length > 0 &&
+        this.items.length < this.requiredItems &&
+        currentTime - this.lastCollectTime > this.collectDelay
+      ) {
         const item = this.targetBox.items.pop();
         this.items.push(item);
+        this.lastCollectTime = currentTime;
       }
       if (this.items.length >= this.requiredItems) {
         this.state = 'goingToPayment';
@@ -57,7 +69,6 @@ export class Client {
         this.isDone = true;
       }
     }
-
     this.updateAnimation();
   }
 

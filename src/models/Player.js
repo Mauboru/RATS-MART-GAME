@@ -6,7 +6,7 @@ export class Player {
     this.direction = { x: 0, y: 0 };
     this.state = 'idle';
     this.facing = 'right';
-    this.money = 0;
+    this.money = 200;
 
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
