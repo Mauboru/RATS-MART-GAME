@@ -16,6 +16,28 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
   useEffect(() => { activeRef.current = active; }, [active]);
 
   useEffect(() => {
+    const handleFullscreen = () => {
+      const el = document.documentElement;  // ou canvasRef.current.parentNode
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) { /* Safari */
+        el.webkitRequestFullscreen();
+      } else if (el.msRequestFullscreen) { /* IE11 */
+        el.msRequestFullscreen();
+      }
+    };
+
+    // Ativa fullscreen no primeiro toque
+    window.addEventListener('touchstart', handleFullscreen, { once: true });
+    window.addEventListener('click', handleFullscreen, { once: true }); // opcional, para desktop
+
+    return () => {
+      window.removeEventListener('touchstart', handleFullscreen);
+      window.removeEventListener('click', handleFullscreen);
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const aspectRatio = 9 / 16;
@@ -49,14 +71,14 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
     const WORLD_SIZE = 2000;
 
     playerRef.current = new Player(100, 100, 3, playerImg, 32, 32);
-    playerRef.current.drawWidth = 64;   
-    playerRef.current.drawHeight = 64; 
+    playerRef.current.drawWidth = 64;
+    playerRef.current.drawHeight = 64;
 
     const boxes = [
       new Box(300, 300, 64, 64, boxImg),
       new Box(400, 300, 64, 64, boxImg),
       new Box(500, 300, 64, 64, boxImg),
-    ]
+    ];
     const generators = [
       new GeneratorObject(500, 500, 64, 64, generatorImg, itemImg, 200),
       new GeneratorObject(700, 300, 64, 64, generatorImg, itemImg, 200),
@@ -85,7 +107,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
     let clientSpawnInterval = setInterval(() => {
       spawnClient();
     }, Math.random() * 3000 + 2000);
-  
+
     let animationFrameId;
 
     const loop = () => {
@@ -102,7 +124,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
         generator.generatedItems = generator.generatedItems.filter(item => {
           if (item.checkCollision(player)) {
             player.addItem(item);
-            return false; 
+            return false;
           }
           return true;
         });
@@ -116,7 +138,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
           }
         }
       });
-      
+
       clients.forEach(client => client.update());
 
       for (let i = clients.length - 1; i >= 0; i--) {
