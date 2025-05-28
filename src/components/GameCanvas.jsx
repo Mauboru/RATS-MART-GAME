@@ -42,9 +42,11 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
     };
 
     window.addEventListener('touchstart', handleFullscreen, { once: true });
+    window.addEventListener('click', handleFullscreen, { once: true });
 
     return () => {
       window.removeEventListener('touchstart', handleFullscreen);
+      window.removeEventListener('click', handleFullscreen);
     };
   }, []);
 
