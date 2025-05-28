@@ -1,4 +1,4 @@
-export class PaymentBox {
+export default class PaymentBox {
     constructor(x, y, width, height, img) {
       this.x = x;
       this.y = y;

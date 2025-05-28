@@ -1,4 +1,4 @@
-export class ConstructionSpot {
+export default class ConstructionSpot {
   constructor(x, y, width, height, cost, image, type, isVisible = true) {
     this.x = x;
     this.y = y;

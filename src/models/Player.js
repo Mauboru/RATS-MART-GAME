@@ -1,4 +1,4 @@
-export class Player {
+export default class Player {
   constructor(x, y, speed, spriteSheet, frameWidth, frameHeight) {
     this.x = x;
     this.y = y;

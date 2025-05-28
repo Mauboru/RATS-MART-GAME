@@ -1,21 +1,18 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject } from '../models';
+import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
-import { Player } from '../models/Player';
-import { PaymentBox } from '../models/PaymentBox';
-import { ConstructionSpot } from '../models/ConstructionSpot';
-import { Client } from '../models/Client';
-import { Box } from '../models/Box';
-import { GeneratorObject } from '../hooks/generatorObject';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
-export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage }) {
+export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
   const playerRef = useRef(null);
+  const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
-
+  const { assets, loaded } = useAssets(assetPaths);
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
-  const activeRef = useRef(active);
-  useEffect(() => { activeRef.current = active; }, [active]);
 
   function getWaitingPosition(targetBox, index) {
     const spacing = 15;
@@ -29,9 +26,15 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
     };
   }
 
+  // Verifica se o Joystick esta ativo
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  // Verifica se fullscreen esta ativo
   useEffect(() => {
     const handleFullscreen = () => {
-      const el = document.documentElement; 
+      const el = document.documentElement;
       if (el.requestFullscreen) {
         el.requestFullscreen();
       } else if (el.webkitRequestFullscreen) {
@@ -50,7 +53,10 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
     };
   }, []);
 
+  // Lógica geral do jogo
   useEffect(() => {
+    if (!loaded) return;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
@@ -95,7 +101,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       if (clients.length >= 5) return;
       if (boxes.length === 0) return;
     
-      const targetBoxIndex = Math.floor(Math.random() * boxes.length); 
+      const targetBoxIndex = Math.floor(Math.random() * boxes.length);
       const client = new Client(0, 0, 1.2, boxes[targetBoxIndex], paymentBox, Math.floor(Math.random() * 3) + 1, playerImg, 32, 32);
       clients.push(client);
     };
@@ -117,7 +123,8 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
 
       generators.forEach(generator => generator.update());
 
-      generators.forEach(generator => { generator.generatedItems = generator.generatedItems.filter(item => {
+      generators.forEach(generator => {
+        generator.generatedItems = generator.generatedItems.filter(item => {
           if (item.checkCollision(player)) {
             player.addItem(item);
             return false;
@@ -139,33 +146,25 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
         }
       });
 
-      clients.forEach(client => {
-        const sameBoxClients = clients.filter(c => c.targetBox === client.targetBox);
+      const boxesWithWaitingClients = new Set(clients.filter(c => c.state === 'waiting').map(c => c.targetBox));
+
+      boxesWithWaitingClients.forEach(targetBox => {
+        const waitingClients = clients.filter(c => c.targetBox === targetBox && c.state === 'waiting');
+        waitingClients.forEach((client, index) => {
+          client.waitPos = getWaitingPosition(targetBox, index);
       
-        sameBoxClients.sort((a, b) => {
-          const distA = Math.hypot(a.x - a.targetBox.x, a.y - a.targetBox.y);
-          const distB = Math.hypot(b.x - b.targetBox.x, b.y - b.targetBox.y);
-          return distA - distB;
-        });
-      
-        const index = sameBoxClients.indexOf(client);
-      
-        if (client.state === 'waiting') {
-          client.waitPos = getWaitingPosition(client.targetBox, index);
-      
-          const centerX = client.targetBox.x + client.targetBox.width / 2;
-          const centerY = client.targetBox.y + client.targetBox.height / 2;
+          const centerX = targetBox.x + targetBox.width / 2;
+          const centerY = targetBox.y + targetBox.height / 2;
           const dx = centerX - client.x;
           const dy = centerY - client.y;
           const length = Math.hypot(dx, dy);
       
           client.direction = length === 0 ? { x: 1, y: 0 } : { x: dx / length, y: dy / length };
-      
           client.facing = client.direction.x >= 0 ? 'right' : 'left';
-        }
-      
-        client.update();
+        });
       });
+      
+      clients.forEach(client => client.update());
       
       for (let i = clients.length - 1; i >= 0; i--) {
         if (clients[i].isDone) {
@@ -180,7 +179,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       }
 
       constructionSpots.forEach(spot => {
-        if (!spot.isBuilt && spot.checkCollision(player)  && player.money > 0) {
+        if (!spot.isBuilt && spot.checkCollision(player) && player.money > 0) {
           const transferAmount = Math.min(1, player.money);
           player.money -= transferAmount;
           spot.cost -= transferAmount;
@@ -208,7 +207,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
               default:
                 break;
             }
-              const allVisibleBuilt = constructionSpots
+            const allVisibleBuilt = constructionSpots
               .filter(s => s.isVisible)
               .every(s => s.isBuilt);
           
@@ -244,7 +243,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       generators.forEach(generator => generator.draw(ctx, cameraX, cameraY));
       paymentBox.draw(ctx, cameraX, cameraY);
       clients.forEach(client => client.draw(ctx, cameraX, cameraY));
-      constructionSpots.forEach(spot => {if (!spot.isBuilt) {spot.draw(ctx, cameraX, cameraY)}});      
+      constructionSpots.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
       player.draw(ctx, cameraX, cameraY);
 
       ctx.fillStyle = 'white';
@@ -260,7 +259,7 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [directionRef, backgroundImg, playerImg]);
+  }, [loaded, directionRef, backgroundImg, playerImg]);
 
   return (
     <>
@@ -276,13 +275,14 @@ export function GameCanvas({ backgroundImg, playerImg, boxImg, generatorImg, ite
         }}
         {...handlers}
       >
-        <canvas
-          ref={canvasRef}
-          style={{
-            touchAction: 'none',
-            imageRendering: 'pixelated',
-          }}
-        />
+        {loaded ? (
+          <canvas
+            ref={canvasRef}
+            style={{ touchAction: 'none', imageRendering: 'pixelated' }}
+          />
+        ) : (
+          <LoadingSpinner />
+        )}
       </div>
 
       <JoystickOverlay

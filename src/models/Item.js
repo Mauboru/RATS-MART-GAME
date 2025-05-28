@@ -1,4 +1,4 @@
-export class Item {
+export default class Item {
   constructor(x, y, width, height, sprite) {
     this.x = x;
     this.y = y;

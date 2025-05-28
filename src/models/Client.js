@@ -1,4 +1,4 @@
-export class Client {
+export default class Client {
   constructor(x, y, speed, targetBox, paymentBox, requiredItems, spriteSheet, frameWidth, frameHeight) {
     this.x = x;
     this.y = y;

@@ -1,6 +1,6 @@
-import { Item } from '../models/Item';
+import { Item } from '.';
 
-export class GeneratorObject {
+export default class GeneratorObject {
   constructor(x, y, width, height, sprite, itemSprite, itemCooldown = 300, maxItems = 3) {
     this.x = x;
     this.y = y;

@@ -1,4 +1,4 @@
-export class Box {
+export default class Box {
   constructor(x, y, width, height, sprite) {
     this.x = x;
     this.y = y;
