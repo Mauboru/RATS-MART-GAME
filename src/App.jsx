@@ -7,7 +7,8 @@ export default function App() {
     boxImg: './box.png',
     generatorImg: './generator.png',
     itemImg: './item.png',
-    spotImage: './spot.png'
+    spotImage: './spot.png',
+    paymentBoxImage: './paymentBox.png'
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

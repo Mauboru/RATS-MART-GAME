@@ -11,8 +11,10 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
-  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage } = assets;
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
+  const maxClients = 5;
+  const intervalsAddClients = [3000, 5000, 7000, 9000];
 
   function getWaitingPosition(targetBox, index) {
     const spacing = 15;
@@ -81,8 +83,8 @@ export function GameCanvas({ assetPaths }) {
     const WORLD_SIZE = 2000;
 
     playerRef.current = new Player(100, 100, 3, playerImg, 32, 32);
-    playerRef.current.drawWidth = 64;
-    playerRef.current.drawHeight = 64;
+    playerRef.current.drawWidth = 64; // remover futuramente e fazer sprites com 64 por 64
+    playerRef.current.drawHeight = 64; // remover futuramente e fazer sprites com 64 por 64
 
     const constructionSpots = [
       new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
@@ -92,28 +94,30 @@ export function GameCanvas({ assetPaths }) {
       new ConstructionSpot(200, 620, 64, 64, 800, spotImage, 2, false),
     ];
 
-    const paymentBox = new PaymentBox(100, 350, 64, 64, boxImg);
+    const paymentBox = new PaymentBox(25, 150, 128, 64, paymentBoxImage);
     const clients = [];
     const generators = [];
     const boxes = [];
 
     const spawnClient = () => {
-      if (clients.length >= 5) return;
-      if (boxes.length === 0) return;
-    
+      if (clients.length >= maxClients || boxes.length === 0 || generators.length === 0) return;
       const targetBoxIndex = Math.floor(Math.random() * boxes.length);
       const client = new Client(0, 0, 1.2, boxes[targetBoxIndex], paymentBox, Math.floor(Math.random() * 3) + 1, playerImg, 32, 32);
       clients.push(client);
     };
 
-    let clientSpawnInterval = setInterval(() => {
+    function spawnRandom() {
       spawnClient();
-    }, Math.random() * 3000 + 2000);
+      const delay = intervalsAddClients[Math.floor(Math.random() * intervalsAddClients.length)];
+      setTimeout(spawnRandom, delay);
+    }
+    spawnRandom();
 
     let animationFrameId;
 
     const loop = () => {
       const player = playerRef.current;
+      const transferDelay = 300;
 
       if (activeRef.current) {
         player.update(directionRef.current);
@@ -122,7 +126,6 @@ export function GameCanvas({ assetPaths }) {
       }
 
       generators.forEach(generator => generator.update());
-
       generators.forEach(generator => {
         generator.generatedItems = generator.generatedItems.filter(item => {
           if (item.checkCollision(player)) {
@@ -132,8 +135,6 @@ export function GameCanvas({ assetPaths }) {
           return true;
         });
       });
-
-      const transferDelay = 300;
 
       boxes.forEach(box => {
         if (box.checkCollision(player) && player.items.length > 0 && box.items.length < 9) {
@@ -165,7 +166,6 @@ export function GameCanvas({ assetPaths }) {
       });
       
       clients.forEach(client => client.update());
-      
       for (let i = clients.length - 1; i >= 0; i--) {
         if (clients[i].isDone) {
           clients.splice(i, 1);
@@ -189,17 +189,7 @@ export function GameCanvas({ assetPaths }) {
       
             switch (spot.type) {
               case 1:
-                generators.push(
-                  new GeneratorObject(
-                    spot.x,
-                    spot.y,
-                    spot.width,
-                    spot.height,
-                    generatorImg,
-                    itemImg,
-                    200
-                  )
-                );
+                generators.push(new GeneratorObject(spot.x, spot.y, spot.width, spot.height, generatorImg, itemImg, 200));
                 break;
               case 2:
                 boxes.push(new Box(spot.x, spot.y, spot.width, spot.height, boxImg));
@@ -207,6 +197,7 @@ export function GameCanvas({ assetPaths }) {
               default:
                 break;
             }
+
             const allVisibleBuilt = constructionSpots
               .filter(s => s.isVisible)
               .every(s => s.isBuilt);
@@ -252,7 +243,6 @@ export function GameCanvas({ assetPaths }) {
 
       animationFrameId = requestAnimationFrame(loop);
     };
-
     loop();
 
     return () => {
