@@ -15,6 +15,10 @@ export default class GeneratorObject {
     this.maxItems = maxItems;
   }
 
+  getBaseY() {
+    return this.y + this.height;
+  }
+
   update() {
     this.timer++;
     if (this.generatedItems.length < this.maxItems && this.timer >= this.cooldown) {

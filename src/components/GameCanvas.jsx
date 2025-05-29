@@ -4,6 +4,7 @@ import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { willCollide } from '../utils/collision';
 
 export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
@@ -24,7 +25,7 @@ export function GameCanvas({ assetPaths }) {
   
     return {
       x: baseX,
-      y: targetBox.y + targetBox.height / 2 + offsetY,
+      y: targetBox.y + targetBox.height / 2 + offsetY + 25,
     };
   }
 
@@ -90,11 +91,11 @@ export function GameCanvas({ assetPaths }) {
       new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
       new ConstructionSpot(300, 200, 64, 64, 350, spotImage, 1, false),
       new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
-      new ConstructionSpot(200, 520, 64, 64, 450, spotImage, 2, false),
-      new ConstructionSpot(200, 620, 64, 64, 800, spotImage, 2, false),
+      new ConstructionSpot(300, 420, 64, 64, 120, spotImage, 2, false),
+      new ConstructionSpot(400, 420, 64, 64, 200, spotImage, 2, false),
     ];
 
-    const paymentBox = new PaymentBox(25, 150, 128, 64, paymentBoxImage);
+    const paymentBox = new PaymentBox(25, 350, 128, 64, paymentBoxImage);
     const clients = [];
     const generators = [];
     const boxes = [];
@@ -118,11 +119,12 @@ export function GameCanvas({ assetPaths }) {
     const loop = () => {
       const player = playerRef.current;
       const transferDelay = 300;
+      const collidables = [...boxes, paymentBox];
 
       if (activeRef.current) {
-        player.update(directionRef.current);
+        player.update(directionRef.current, collidables);
       } else {
-        player.update({ x: 0, y: 0 });
+        player.update({ x: 0, y: 0 }, []);
       }
 
       generators.forEach(generator => generator.update());
@@ -192,7 +194,7 @@ export function GameCanvas({ assetPaths }) {
                 generators.push(new GeneratorObject(spot.x, spot.y, spot.width, spot.height, generatorImg, itemImg, 200));
                 break;
               case 2:
-                boxes.push(new Box(spot.x, spot.y, spot.width, spot.height, boxImg));
+                boxes.push(new Box(spot.x, spot.y + 100, spot.width, spot.height, boxImg));
                 break;
               default:
                 break;
@@ -230,12 +232,18 @@ export function GameCanvas({ assetPaths }) {
         viewportWidth, viewportHeight
       );
 
-      boxes.forEach(box => box.draw(ctx, cameraX, cameraY));
-      generators.forEach(generator => generator.draw(ctx, cameraX, cameraY));
-      paymentBox.draw(ctx, cameraX, cameraY);
-      clients.forEach(client => client.draw(ctx, cameraX, cameraY));
       constructionSpots.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
-      player.draw(ctx, cameraX, cameraY);
+
+      const renderObjects = [
+        ...boxes,
+        ...generators,
+        ...clients,
+        player,
+        paymentBox
+      ];
+
+      renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
+      renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));
 
       ctx.fillStyle = 'white';
       ctx.font = '20px Arial';

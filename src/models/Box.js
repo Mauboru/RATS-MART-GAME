@@ -6,6 +6,13 @@ export default class Box {
     this.height = height;
     this.sprite = sprite;
     this.items = [];
+
+    this.collisionRegion = { 
+      x: 0, 
+      y: this.height - 30, 
+      width: this.width, 
+      height: 30 
+    };
   }
 
   addItem(item) {
@@ -23,6 +30,10 @@ export default class Box {
     );
   }
 
+  getBaseY() {
+    return this.y + this.height;
+  }
+
   draw(ctx, cameraX, cameraY) {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;
@@ -32,7 +43,7 @@ export default class Box {
     const itemSize = 16;
     const padding = 4;
     const cols = Math.floor(this.width / (itemSize + padding));
-
+    
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
       const col = i % cols;

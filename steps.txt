@@ -1,1 +1,14 @@
-- 
+[ ✅ ] - Joystick
+[ ✅ ] - Clientes
+[ ✅ ] - Locais para Liberar
+[ ✅ ] - Player
+[ ✅ ] - Caixa de Pagamento
+[ ✅ ] - Estante para Itens
+[ ✅ ] - Gerador de Itens
+[ ✅ ] - Camera
+[ ✅ ] - Profundidade
+[ ✅ ] - Colisão
+[  ] - Esperar para pagar no Caixa
+[  ] - Ajudante de Caixa
+[  ] - Ajudante de Itens
+[  ] - Dinheiro

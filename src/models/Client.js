@@ -71,6 +71,10 @@ export default class Client {
     }
     this.updateAnimation();
   }
+  
+  getBaseY() {
+    return this.y + this.drawHeight;
+  }
 
   updateAnimation() {
     this.frameTimer++;

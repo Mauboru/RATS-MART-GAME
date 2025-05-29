@@ -1,3 +1,5 @@
+import { willCollide } from "../utils/collision";
+
 export default class Player {
   constructor(x, y, speed, spriteSheet, frameWidth, frameHeight) {
     this.x = x;
@@ -22,23 +24,60 @@ export default class Player {
 
     this.items = [];
     this.maxItems = 6;
+
+    this.collisionRegion = { 
+      x: 15, 
+      y: this.height + 20, 
+      width: this.width, 
+      height: 10 
+    };
   }
 
-  update(direction) {
+  update(direction, collidables) {
     this.direction = direction;
-
+  
+    const newX = this.x + direction.x * this.speed;
+    const newY = this.y + direction.y * this.speed;
+  
+    const canMoveX = !collidables.some(obj =>
+      willCollide(
+        { x: newX, y: this.y, collisionRegion: this.collisionRegion },
+        obj,
+        0,
+        0
+      )
+    );
+  
+    if (canMoveX) {
+      this.x = newX;
+    }
+  
+    const canMoveY = !collidables.some(obj =>
+      willCollide(
+        { x: this.x, y: newY, collisionRegion: this.collisionRegion },
+        obj,
+        0,
+        0
+      )
+    );
+  
+    if (canMoveY) {
+      this.y = newY;
+    }
+  
     if (direction.x !== 0 || direction.y !== 0) {
       this.state = 'walking';
-      this.x += direction.x * this.speed;
-      this.y += direction.y * this.speed;
-
       if (direction.x > 0) this.facing = 'right';
       else if (direction.x < 0) this.facing = 'left';
     } else {
       this.state = 'idle';
     }
-
+  
     this.updateAnimation();
+  }
+
+  getBaseY() {
+    return this.y + this.drawHeight;
   }
 
   updateAnimation() {
@@ -81,7 +120,7 @@ export default class Player {
     );
   
     ctx.restore();
-
+    
     const itemSize = 16;
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
