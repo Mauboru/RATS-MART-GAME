@@ -8,7 +8,10 @@
 [ ✅ ] - Camera
 [ ✅ ] - Profundidade
 [ ✅ ] - Colisão
-[  ] - Esperar para pagar no Caixa
+[ ✅ ] - Esperar para pagar no Caixa
+[  ] - Dinheiro
 [  ] - Ajudante de Caixa
 [  ] - Ajudante de Itens
-[  ] - Dinheiro
+
+
+# A cada cada caixa nova o limite de player aumenta em 2

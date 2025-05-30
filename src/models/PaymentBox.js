@@ -44,4 +44,13 @@ export default class PaymentBox {
       this.y + this.height > player.y
     );
   }
+
+  checkPlayerCollision(player) {
+    return (
+      player.x < this.x + this.width &&
+      player.x + player.width > this.x &&
+      player.y < this.y + this.height &&
+      player.y + player.height > this.y
+    );
+  }
 }

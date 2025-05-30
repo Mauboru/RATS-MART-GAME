@@ -26,11 +26,20 @@ export default class Client {
 
     this.facing = 'right';
 
-    this.collectDelay = 300; // tempo (ms) para pegar um item
+    this.collectDelay = 300;
     this.lastCollectTime = 0;
   }
 
-  update(currentTime = performance.now()) {
+  checkPlayerCollision(player) {
+    return (
+      player.x < this.x + this.width &&
+      player.x + player.width > this.x &&
+      player.y < this.y + this.height &&
+      player.y + player.height > this.y
+    );
+  }
+
+  update(player, currentTime = performance.now()) {
     if (this.state === 'goingToBox') {
       this.moveTo(this.targetBox);
       if (this.checkCollision(this.targetBox)) {
@@ -56,6 +65,15 @@ export default class Client {
     } else if (this.state === 'goingToPayment') {
       this.moveTo(this.paymentBox);
       if (this.checkCollision(this.paymentBox)) {
+        this.state = 'waitingForPlayer';
+      }
+    } else if (this.state === 'leaving') {
+      this.moveTo({ x: this.exitX, y: this.exitY });
+      if (Math.hypot(this.x - this.exitX, this.y - this.exitY) < 5) {
+        this.isDone = true;
+      }
+    } else if (this.state === 'waitingForPlayer') {
+      if (this.paymentBox.checkPlayerCollision(player)) {
         const totalPayment = this.items.length * 10;
         this.paymentBox.addMoney(totalPayment);
         this.items = [];
@@ -63,12 +81,7 @@ export default class Client {
         this.exitX = 0;
         this.exitY = 0;
       }
-    } else if (this.state === 'leaving') {
-      this.moveTo({ x: this.exitX, y: this.exitY });
-      if (Math.hypot(this.x - this.exitX, this.y - this.exitY) < 5) {
-        this.isDone = true;
-      }
-    }
+    }    
     this.updateAnimation();
   }
   

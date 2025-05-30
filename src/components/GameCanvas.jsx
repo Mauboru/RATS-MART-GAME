@@ -167,7 +167,7 @@ export function GameCanvas({ assetPaths }) {
         });
       });
       
-      clients.forEach(client => client.update());
+      clients.forEach(client => client.update(player));
       for (let i = clients.length - 1; i >= 0; i--) {
         if (clients[i].isDone) {
           clients.splice(i, 1);
