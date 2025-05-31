@@ -30,14 +30,8 @@ export default class GeneratorObject {
   
       const index = this.generatedItems.length; 
       const offset = offsets[index] || { x: 0, y: 0 };
-  
-      const newItem = new Item(
-        this.x + this.width / 2 + offset.x,
-        this.y + this.height / 2 + offset.y,
-        16,
-        16,
-        this.itemSprite
-      );
+      const newItem = new Item(this.x + this.width / 2 + offset.x, this.y + this.height / 2 + offset.y, 16, 16, this.itemSprite);
+      
       this.generatedItems.push(newItem);
       this.timer = 0;
     }

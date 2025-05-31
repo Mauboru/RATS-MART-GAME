@@ -9,8 +9,9 @@ export default class ConstructionSpot {
     this.type = type;
     this.isBuilt = false;
     this.isVisible = isVisible;
+    this.incomingMoneys = [];
   }
-  
+
   checkCollision(player) {
     if (!this.isVisible) return false;
 
@@ -22,11 +23,43 @@ export default class ConstructionSpot {
     );
   }
 
-draw(ctx, cameraX, cameraY) {
+  addIncomingMoney(money) {
+    this.incomingMoneys.push(money);
+  }
+
+  updateIncomingMoneys() {
+    for (let i = this.incomingMoneys.length - 1; i >= 0; i--) {
+      const m = this.incomingMoneys[i];
+      const dx = this.x - m.x;
+      const dy = this.y - m.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 1) {
+        m.x += (dx / dist) * 2;
+        m.y += (dy / dist) * 2;
+      }
+
+      if (
+        m.x < this.x + this.width &&
+        m.x + m.width > this.x &&
+        m.y < this.y + this.height &&
+        m.y + m.height > this.y
+      ) {
+        this.cost -= 1;
+        this.incomingMoneys.splice(i, 1);
+      }
+    }
+  }
+
+  isReadyToBuild() {
+    return this.cost <= 0 && !this.isBuilt;
+  }
+
+  draw(ctx, cameraX, cameraY) {
     if (!this.isBuilt && this.isVisible && this.image) {
       ctx.drawImage(this.image, this.x - cameraX, this.y - cameraY, this.width, this.height);
     }
-
+  
     if (this.isVisible) {
       ctx.fillStyle = 'white';
       ctx.font = '16px Arial';
@@ -37,4 +70,3 @@ draw(ctx, cameraX, cameraY) {
     }
   }
 }
-  

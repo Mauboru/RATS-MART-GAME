@@ -1,10 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
-import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject } from '../models';
+import { useRef, useEffect } from 'react';
+import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money } from '../models';
 import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { willCollide } from '../utils/collision';
 
 export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
@@ -12,7 +11,7 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
-  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage } = assets;
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
   const maxClients = 5;
   const intervalsAddClients = [3000, 5000, 7000, 9000];
@@ -95,7 +94,7 @@ export function GameCanvas({ assetPaths }) {
       new ConstructionSpot(400, 420, 64, 64, 200, spotImage, 2, false),
     ];
 
-    const paymentBox = new PaymentBox(25, 350, 128, 64, paymentBoxImage);
+    const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
     const clients = [];
     const generators = [];
     const boxes = [];
@@ -103,7 +102,9 @@ export function GameCanvas({ assetPaths }) {
     const spawnClient = () => {
       if (clients.length >= maxClients || boxes.length === 0 || generators.length === 0) return;
       const targetBoxIndex = Math.floor(Math.random() * boxes.length);
-      const client = new Client(0, 0, 1.2, boxes[targetBoxIndex], paymentBox, Math.floor(Math.random() * 3) + 1, playerImg, 32, 32);
+      const client = new Client(0, 0, 1.2, boxes[targetBoxIndex], paymentBox, Math.floor(Math.random() * 3) + 1, clientImg, 32, 32);
+      client.drawWidth = 64;
+      client.drawHeight = 64;
       clients.push(client);
     };
 
@@ -175,43 +176,72 @@ export function GameCanvas({ assetPaths }) {
       }
 
       if (paymentBox.checkCollision(player) && paymentBox.money > 0) {
-        const transferAmount = Math.min(1, paymentBox.money);
-        player.money += transferAmount;
-        paymentBox.money -= transferAmount;
+        paymentBox.transferTimer++;
+        if (paymentBox.transferTimer >= paymentBox.transferCooldown) {
+          if (paymentBox.generatedMoneys.length > 0) {
+            const movingMoney = paymentBox.generatedMoneys.pop();
+            paymentBox.movingMoneys.push(movingMoney);
+            paymentBox.money -= 1;
+          }
+          paymentBox.transferTimer = 0;
+        }
+      } else {
+        paymentBox.transferTimer = 0;
       }
+      
+      paymentBox.updateMovingMoneys(player);
 
       constructionSpots.forEach(spot => {
+        spot.updateIncomingMoneys();
+      
+        if (!spot.transferTimer) spot.transferTimer = 0;
+      
         if (!spot.isBuilt && spot.checkCollision(player) && player.money > 0) {
-          const transferAmount = Math.min(1, player.money);
-          player.money -= transferAmount;
-          spot.cost -= transferAmount;
+          spot.transferTimer++;
       
-          if (spot.cost <= 0) {
-            spot.isBuilt = true;
+          if (spot.transferTimer >= 6) { // ajusta o cooldown, ex: 6 frames
+            const movingMoney = new Money(
+              player.x + player.width / 2, 
+              player.y + 16, 
+              32, 
+              32, 
+              moneyImg
+            );
       
-            switch (spot.type) {
-              case 1:
-                generators.push(new GeneratorObject(spot.x, spot.y, spot.width, spot.height, generatorImg, itemImg, 200));
-                break;
-              case 2:
-                boxes.push(new Box(spot.x, spot.y + 100, spot.width, spot.height, boxImg));
-                break;
-              default:
-                break;
-            }
-
-            const allVisibleBuilt = constructionSpots
-              .filter(s => s.isVisible)
-              .every(s => s.isBuilt);
-          
-            if (allVisibleBuilt) {
-              constructionSpots
-                .filter(s => !s.isVisible)
-                .forEach(s => { s.isVisible = true; });
-            }
+            player.money -= 1;
+            spot.addIncomingMoney(movingMoney);
+            spot.transferTimer = 0;
+          }
+        } else {
+          spot.transferTimer = 0;
+        }
+      
+        if (spot.isReadyToBuild()) {
+          spot.isBuilt = true;
+      
+          switch (spot.type) {
+            case 1:
+              generators.push(new GeneratorObject(spot.x, spot.y, spot.width, spot.height, generatorImg, itemImg, 200));
+              break;
+            case 2:
+              boxes.push(new Box(spot.x, spot.y + 100, spot.width, spot.height, boxImg));
+              break;
+            default:
+              break;
+          }
+      
+          const allVisibleBuilt = constructionSpots
+            .filter(s => s.isVisible)
+            .every(s => s.isBuilt);
+      
+          if (allVisibleBuilt) {
+            constructionSpots
+              .filter(s => !s.isVisible)
+              .forEach(s => { s.isVisible = true; });
           }
         }
       });
+      
 
       const viewportWidth = canvas.width / (window.devicePixelRatio || 1);
       const viewportHeight = canvas.height / (window.devicePixelRatio || 1);
@@ -239,11 +269,15 @@ export function GameCanvas({ assetPaths }) {
         ...generators,
         ...clients,
         player,
-        paymentBox
+        paymentBox,
       ];
 
       renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
       renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));
+
+      const allIncomingMoney = [];
+      constructionSpots.forEach(spot => allIncomingMoney.push(...spot.incomingMoneys));
+      allIncomingMoney.forEach(money => money.draw(ctx, cameraX, cameraY));
 
       ctx.fillStyle = 'white';
       ctx.font = '20px Arial';

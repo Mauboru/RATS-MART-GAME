@@ -19,6 +19,10 @@ export default class Client {
     this.exitX = 0;
     this.exitY = 0;
 
+    this.transferCooldown = 12;
+    this.transferTimer = 0;
+    this.moneyToTransfer = 0;
+
     this.currentFrame = 0;
     this.frameCount = 8;
     this.frameDelay = 6;
@@ -49,7 +53,6 @@ export default class Client {
       if (this.waitPos) {
         this.moveTo(this.waitPos);
       }
-      // coleta lenta: pega 1 item a cada collectDelay ms
       if (
         this.targetBox.items.length > 0 &&
         this.items.length < this.requiredItems &&
@@ -74,14 +77,26 @@ export default class Client {
       }
     } else if (this.state === 'waitingForPlayer') {
       if (this.paymentBox.checkPlayerCollision(player)) {
-        const totalPayment = this.items.length * 10;
-        this.paymentBox.addMoney(totalPayment);
-        this.items = [];
-        this.state = 'leaving';
-        this.exitX = 0;
-        this.exitY = 0;
+        if (this.moneyToTransfer === 0) {
+          this.moneyToTransfer = this.items.length * 10;
+          this.items = []; 
+        }
+        if (this.moneyToTransfer > 0) {
+          this.transferTimer++;
+          if (this.transferTimer >= this.transferCooldown) {
+            this.paymentBox.addMoney(1);
+            this.moneyToTransfer -= 1;
+            this.transferTimer = 0;
+          }
+        } else {
+          this.state = 'leaving';
+          this.exitX = 0;
+          this.exitY = 0;
+        }
+      } else {
+        this.transferTimer = 0; 
       }
-    }    
+    }
     this.updateAnimation();
   }
   

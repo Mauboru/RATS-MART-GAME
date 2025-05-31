@@ -5,3 +5,4 @@ export { default as Item } from './Item';
 export { default as PaymentBox } from './PaymentBox';
 export { default as Player } from './Player';
 export { default as GeneratorObject } from './GeneratorObjects';
+export { default as Money } from './Money';
