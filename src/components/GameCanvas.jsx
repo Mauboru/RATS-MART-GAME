@@ -4,6 +4,7 @@ import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import Cashier from '../models/Cashier';
 
 export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
@@ -11,7 +12,7 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
-  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg } = assets;
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg, cashierImg } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
   const maxClients = 5;
   const intervalsAddClients = [3000, 5000, 7000, 9000];
@@ -92,12 +93,14 @@ export function GameCanvas({ assetPaths }) {
       new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
       new ConstructionSpot(300, 420, 64, 64, 120, spotImage, 2, false),
       new ConstructionSpot(400, 420, 64, 64, 200, spotImage, 2, false),
+      new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, true),
     ];
 
     const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
     const clients = [];
     const generators = [];
     const boxes = [];
+    let cashier = null;
 
     const spawnClient = () => {
       if (clients.length >= maxClients || boxes.length === 0 || generators.length === 0) return;
@@ -168,7 +171,8 @@ export function GameCanvas({ assetPaths }) {
         });
       });
       
-      clients.forEach(client => client.update(player));
+      clients.forEach(client => client.update(player, cashier));
+
       for (let i = clients.length - 1; i >= 0; i--) {
         if (clients[i].isDone) {
           clients.splice(i, 1);
@@ -226,6 +230,11 @@ export function GameCanvas({ assetPaths }) {
             case 2:
               boxes.push(new Box(spot.x, spot.y + 100, spot.width, spot.height, boxImg));
               break;
+            case 3:
+              cashier = new Cashier(0, 0, 1.8, cashierImg, 32, 32);
+              cashier.drawWidth = 64;
+              cashier.drawHeight = 64;
+              break;
             default:
               break;
           }
@@ -271,6 +280,12 @@ export function GameCanvas({ assetPaths }) {
         player,
         paymentBox,
       ];
+
+      if (cashier) {
+        renderObjects.push(cashier);
+        cashier.update({ x: 35, y: 410 });
+      }
+      
 
       renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
       renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));

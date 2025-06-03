@@ -10,7 +10,7 @@
 [ ✅ ] - Colisão
 [ ✅ ] - Esperar para pagar no Caixa
 [ ✅ ] - Dinheiro
-[  ] - Ajudante de Caixa
+[ ✅ ] - Ajudante de Caixa
 [  ] - Ajudante de Itens 
 
 

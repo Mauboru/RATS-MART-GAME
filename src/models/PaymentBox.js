@@ -89,6 +89,8 @@ export default class PaymentBox {
   }
 
   checkPlayerCollision(player) {
+    if (!player) return false;
+    
     return (
       player.x < this.x + this.width &&
       player.x + player.width > this.x &&

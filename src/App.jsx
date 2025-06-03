@@ -10,7 +10,8 @@ export default function App() {
     spotImage: './spot.png',
     paymentBoxImage: './paymentBox.png',
     moneyImg: './money.png',
-    clientImg: './client.png'
+    clientImg: './client.png',
+    cashierImg: './cashier.png'
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

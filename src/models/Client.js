@@ -1,20 +1,14 @@
-export default class Client {
+import Entidade from './Entidade';
+
+export default class Client extends Entidade {
   constructor(x, y, speed, targetBox, paymentBox, requiredItems, spriteSheet, frameWidth, frameHeight) {
-    this.x = x;
-    this.y = y;
-    this.speed = speed;
+    super(x, y, speed, spriteSheet, frameWidth, frameHeight);
+
     this.targetBox = targetBox;
     this.paymentBox = paymentBox;
     this.requiredItems = requiredItems;
-    this.items = [];
-    this.state = 'goingToBox'; 
-    this.spriteSheet = spriteSheet;
-    this.frameWidth = frameWidth;
-    this.frameHeight = frameHeight;
-    this.drawWidth = frameWidth;
-    this.drawHeight = frameHeight;
-    this.width = this.drawWidth;
-    this.height = this.drawHeight;
+
+    this.state = 'goingToBox';
     this.isDone = false;
     this.exitX = 0;
     this.exitY = 0;
@@ -23,36 +17,29 @@ export default class Client {
     this.transferTimer = 0;
     this.moneyToTransfer = 0;
 
-    this.currentFrame = 0;
-    this.frameCount = 8;
-    this.frameDelay = 6;
-    this.frameTimer = 0;
-
-    this.facing = 'right';
-
     this.collectDelay = 300;
     this.lastCollectTime = 0;
   }
 
-  checkPlayerCollision(player) {
+  checkCollisionWith(entidade) {
+    if (!entidade) return false;
     return (
-      player.x < this.x + this.width &&
-      player.x + player.width > this.x &&
-      player.y < this.y + this.height &&
-      player.y + player.height > this.y
+      entidade.x < this.x + this.width &&
+      entidade.x + entidade.width > this.x &&
+      entidade.y < this.y + this.height &&
+      entidade.y + entidade.height > this.y
     );
   }
 
-  update(player, currentTime = performance.now()) {
+  update(player, cashier, currentTime = performance.now()) {
     if (this.state === 'goingToBox') {
       this.moveTo(this.targetBox);
       if (this.checkCollision(this.targetBox)) {
         this.state = 'waiting';
       }
     } else if (this.state === 'waiting') {
-      if (this.waitPos) {
-        this.moveTo(this.waitPos);
-      }
+      if (this.waitPos) this.moveTo(this.waitPos);
+
       if (
         this.targetBox.items.length > 0 &&
         this.items.length < this.requiredItems &&
@@ -76,10 +63,10 @@ export default class Client {
         this.isDone = true;
       }
     } else if (this.state === 'waitingForPlayer') {
-      if (this.paymentBox.checkPlayerCollision(player)) {
+      if (this.paymentBox.checkPlayerCollision(player) || this.paymentBox.checkPlayerCollision(cashier)) {
         if (this.moneyToTransfer === 0) {
           this.moneyToTransfer = this.items.length * 10;
-          this.items = []; 
+          this.items = [];
         }
         if (this.moneyToTransfer > 0) {
           this.transferTimer++;
@@ -94,84 +81,15 @@ export default class Client {
           this.exitY = 0;
         }
       } else {
-        this.transferTimer = 0; 
+        this.transferTimer = 0;
       }
     }
+
     this.updateAnimation();
-  }
-  
-  getBaseY() {
-    return this.y + this.drawHeight;
-  }
-
-  updateAnimation() {
-    this.frameTimer++;
-    if (this.frameTimer >= this.frameDelay) {
-      this.currentFrame = (this.currentFrame + 1) % this.frameCount;
-      this.frameTimer = 0;
-    }
-  }
-
-  moveTo(target) {
-    const dx = target.x - this.x;
-    const dy = target.y - this.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist > 1) {
-      this.x += (dx / dist) * this.speed;
-      this.y += (dy / dist) * this.speed;
-
-      if (dx > 0) {
-        this.facing = 'right';
-      } else if (dx < 0) {
-        this.facing = 'left';
-      }
-    }
-  }
-
-  checkCollision(target) {
-    return (
-      this.x < target.x + target.width &&
-      this.x + this.width > target.x &&
-      this.y < target.y + target.height &&
-      this.y + this.height > target.y
-    );
   }
 
   draw(ctx, cameraX, cameraY) {
-    const drawX = this.x - cameraX;
-    const drawY = this.y - cameraY;
-
     const row = this.state === 'waiting' ? 0 : 1;
-
-    ctx.save();
-    ctx.translate(drawX + this.drawWidth / 2, drawY + this.drawHeight / 2);
-
-    if (this.facing === 'left') {
-      ctx.scale(-1, 1);
-    }
-
-    ctx.drawImage(
-      this.spriteSheet,
-      this.currentFrame * this.frameWidth,
-      row * this.frameHeight,
-      this.frameWidth,
-      this.frameHeight,
-      -this.drawWidth / 2,
-      -this.drawHeight / 2,
-      this.drawWidth,
-      this.drawHeight
-    );
-
-    ctx.restore();
-
-    const itemSize = 16;
-    for (let i = 0; i < this.items.length; i++) {
-      const item = this.items[i];
-      if (item && item.sprite instanceof HTMLImageElement) {
-        const itemX = drawX + this.drawWidth / 2 - itemSize / 2;
-        const itemY = drawY - (i + 1) * (itemSize + 2);
-        ctx.drawImage(item.sprite, itemX, itemY, itemSize, itemSize);
-      }
-    }
+    super.draw(ctx, cameraX, cameraY, row);
   }
 }
