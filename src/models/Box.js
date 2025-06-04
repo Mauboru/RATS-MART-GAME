@@ -6,6 +6,7 @@ export default class Box {
     this.height = height;
     this.sprite = sprite;
     this.items = [];
+    this.capacity = 9;
 
     this.collisionRegion = { 
       x: 0, 
@@ -15,8 +16,12 @@ export default class Box {
     };
   }
 
+  isFull() {
+    return this.items.length >= this.capacity;
+  }
+
   addItem(item) {
-    if (this.items.length < 9) {
+    if (!this.isFull()) {
       this.items.push(item);
     }
   }
@@ -46,6 +51,8 @@ export default class Box {
     
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
+      if (!item || !item.sprite) continue;  // Pula se item inválido
+    
       const col = i % cols;
       const row = Math.floor(i / cols);
       const itemX = drawX + col * (itemSize + padding) + padding / 2;

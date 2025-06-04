@@ -11,7 +11,8 @@ export default function App() {
     paymentBoxImage: './paymentBox.png',
     moneyImg: './money.png',
     clientImg: './client.png',
-    cashierImg: './cashier.png'
+    cashierImg: './cashier.png',
+    stockerImg: './stocker.png'
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

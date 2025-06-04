@@ -19,6 +19,14 @@ export default class GeneratorObject {
     return this.y + this.height;
   }
 
+  hasItem() {
+    return this.generatedItems.length > 0;
+  }
+
+  takeItem() {
+    return this.generatedItems.shift(); 
+  }
+
   update() {
     this.timer++;
     if (this.generatedItems.length < this.maxItems && this.timer >= this.cooldown) {

@@ -11,7 +11,7 @@
 [ ✅ ] - Esperar para pagar no Caixa
 [ ✅ ] - Dinheiro
 [ ✅ ] - Ajudante de Caixa
-[  ] - Ajudante de Itens 
+[ ✅ ] - Ajudante de Itens 
 
 
 # A cada cada caixa nova o limite de player aumenta em 2

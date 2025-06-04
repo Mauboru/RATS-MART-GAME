@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money } from '../models';
+import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money, Stocker } from '../models';
 import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
@@ -12,7 +12,7 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
-  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg, cashierImg } = assets;
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg, cashierImg, stockerImg } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
   const maxClients = 5;
   const intervalsAddClients = [3000, 5000, 7000, 9000];
@@ -89,17 +89,19 @@ export function GameCanvas({ assetPaths }) {
 
     const constructionSpots = [
       new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
-      new ConstructionSpot(300, 200, 64, 64, 350, spotImage, 1, false),
+      new ConstructionSpot(300, 200, 64, 64, 300, spotImage, 1, false),
       new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
-      new ConstructionSpot(300, 420, 64, 64, 120, spotImage, 2, false),
-      new ConstructionSpot(400, 420, 64, 64, 200, spotImage, 2, false),
-      new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, true),
+      new ConstructionSpot(300, 420, 64, 64, 150, spotImage, 2, false),
+      new ConstructionSpot(400, 420, 64, 64, 250, spotImage, 2, false),
+      new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, false),
+      new ConstructionSpot(55, 520, 64, 64, 100, spotImage, 4, false),
     ];
 
     const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
     const clients = [];
     const generators = [];
     const boxes = [];
+    const stockers = [];
     let cashier = null;
 
     const spawnClient = () => {
@@ -203,7 +205,7 @@ export function GameCanvas({ assetPaths }) {
         if (!spot.isBuilt && spot.checkCollision(player) && player.money > 0) {
           spot.transferTimer++;
       
-          if (spot.transferTimer >= 6) { // ajusta o cooldown, ex: 6 frames
+          if (spot.transferTimer >= 6) { 
             const movingMoney = new Money(
               player.x + player.width / 2, 
               player.y + 16, 
@@ -232,8 +234,11 @@ export function GameCanvas({ assetPaths }) {
               break;
             case 3:
               cashier = new Cashier(0, 0, 1.8, cashierImg, 32, 32);
-              cashier.drawWidth = 64;
               cashier.drawHeight = 64;
+              cashier.drawWidth = 64;
+              break;
+            case 4:
+              stockers.push(Object.assign(new Stocker(0, 0, 1.8, stockerImg, 32, 32), { drawHeight: 64, drawWidth: 64 }));
               break;
             default:
               break;
@@ -251,7 +256,6 @@ export function GameCanvas({ assetPaths }) {
         }
       });
       
-
       const viewportWidth = canvas.width / (window.devicePixelRatio || 1);
       const viewportHeight = canvas.height / (window.devicePixelRatio || 1);
 
@@ -271,12 +275,14 @@ export function GameCanvas({ assetPaths }) {
         viewportWidth, viewportHeight
       );
 
+      stockers.forEach(stocker => stocker.update(generators, boxes));
       constructionSpots.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
 
       const renderObjects = [
         ...boxes,
         ...generators,
         ...clients,
+        ...stockers,
         player,
         paymentBox,
       ];
@@ -286,7 +292,6 @@ export function GameCanvas({ assetPaths }) {
         cashier.update({ x: 35, y: 410 });
       }
       
-
       renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
       renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));
 
