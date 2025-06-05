@@ -5,6 +5,7 @@ import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import Cashier from '../models/Cashier';
+import { drawMoneyHud, drawActionButton } from '../utils/drawMoneyHud';
 
 export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
@@ -12,7 +13,8 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
-  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg, clientImg, cashierImg, stockerImg } = assets;
+  const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg,
+    clientImg, cashierImg, stockerImg, configButtonIcon, cartButtonIcon, hatButtonIcon, upgradeButtonIcon, dailyButtonIcon, adsButtonIcon } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
   const maxClients = 5;
   const intervalsAddClients = [3000, 5000, 7000, 9000];
@@ -62,6 +64,39 @@ export function GameCanvas({ assetPaths }) {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+
+    const buttonSize = 45;
+    const padding = 10;
+    const buttons = [
+      { x: padding, y: 10, size: buttonSize, action: () => alert('Config clicado!') },
+      { x: padding, y: 10 + (buttonSize + padding) * 1, size: buttonSize, action: () => alert('Carrinho clicado!') },
+      { x: padding, y: 10 + (buttonSize + padding) * 2, size: buttonSize, action: () => alert('Upgrade clicado!') },
+      { x: padding, y: 10 + (buttonSize + padding) * 3, size: buttonSize, action: () => alert('Chapéu clicado!') },
+      { x: padding, y: 10 + (buttonSize + padding) * 4, size: buttonSize, action: () => alert('Daily clicado!') },
+      { x: padding, y: 10 + (buttonSize + padding) * 5, size: buttonSize, action: () => alert('Ads clicado!') },
+    ];
+
+    function checkButtonClick(clickX, clickY) {
+      buttons.forEach(btn => {
+        if (
+          clickX >= btn.x &&
+          clickX <= btn.x + btn.size &&
+          clickY >= btn.y &&
+          clickY <= btn.y + btn.size
+        ) {
+          btn.action();
+        }
+      });
+    }
+  
+    function handleClick(event) {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const clickY = event.clientY - rect.top;
+      checkButtonClick(clickX, clickY);
+    }
+  
+    canvas.addEventListener('click', handleClick);
     
     const resize = () => {
       const width = window.innerWidth;
@@ -299,9 +334,26 @@ export function GameCanvas({ assetPaths }) {
       constructionSpots.forEach(spot => allIncomingMoney.push(...spot.incomingMoneys));
       allIncomingMoney.forEach(money => money.draw(ctx, cameraX, cameraY));
 
-      ctx.fillStyle = 'white';
-      ctx.font = '20px Arial';
-      ctx.fillText(`Dinheiro: $${player.money}`, 65, 30);
+      drawMoneyHud(ctx, player.money, 0, viewportWidth);
+
+      let startY = 10;
+
+      drawActionButton(ctx, configButtonIcon, padding, startY, buttonSize);
+      startY += buttonSize + padding;
+
+      drawActionButton(ctx, cartButtonIcon, padding, startY, buttonSize);
+      startY += buttonSize + padding;
+
+      drawActionButton(ctx, upgradeButtonIcon, padding, startY, buttonSize);
+      startY += buttonSize + padding;
+
+      drawActionButton(ctx, hatButtonIcon, padding, startY, buttonSize);
+      startY += buttonSize + padding;
+
+      drawActionButton(ctx, dailyButtonIcon, padding, startY, buttonSize);
+      startY += buttonSize + padding; 
+
+      drawActionButton(ctx, adsButtonIcon, padding, startY, buttonSize);
 
       animationFrameId = requestAnimationFrame(loop);
     };
@@ -317,32 +369,40 @@ export function GameCanvas({ assetPaths }) {
     <>
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          position: 'relative',
+          width: '100vw',
           height: '100vh',
           background: '#000',
           touchAction: 'none',
           userSelect: 'none',
+          overflow: 'hidden', 
         }}
         {...handlers}
       >
         {loaded ? (
           <canvas
             ref={canvasRef}
-            style={{ touchAction: 'none', imageRendering: 'pixelated' }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              touchAction: 'none',
+              imageRendering: 'pixelated',
+            }}
           />
         ) : (
           <LoadingSpinner />
         )}
+  
+        <JoystickOverlay
+          active={active}
+          basePos={basePos}
+          stickPos={stickPos}
+          radius={radius}
+        />
       </div>
-
-      <JoystickOverlay
-        active={active}
-        basePos={basePos}
-        stickPos={stickPos}
-        radius={radius}
-      />
     </>
   );
 }

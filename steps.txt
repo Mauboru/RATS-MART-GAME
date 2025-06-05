@@ -12,6 +12,10 @@
 [ ✅ ] - Dinheiro
 [ ✅ ] - Ajudante de Caixa
 [ ✅ ] - Ajudante de Itens 
+[ ✅ ] - HUD
+[  ] - Lixeira
+[  ] - Salvamento Automatico
+[  ] - Ajudante estamina
 
 
 # A cada cada caixa nova o limite de player aumenta em 2

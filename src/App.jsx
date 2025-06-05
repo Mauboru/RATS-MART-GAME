@@ -12,7 +12,13 @@ export default function App() {
     moneyImg: './money.png',
     clientImg: './client.png',
     cashierImg: './cashier.png',
-    stockerImg: './stocker.png'
+    stockerImg: './stocker.png',
+    configButtonIcon: './engrenagem.png',
+    cartButtonIcon: './cart.png',
+    hatButtonIcon: './hat.png',
+    upgradeButtonIcon: './upgrade.png',
+    dailyButtonIcon: './daily.png',
+    adsButtonIcon: './ads.png'
   };
 
   return <GameCanvas assetPaths={assetPaths} />;
