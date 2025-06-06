@@ -18,7 +18,8 @@ export default function App() {
     hatButtonIcon: './hat.png',
     upgradeButtonIcon: './upgrade.png',
     dailyButtonIcon: './daily.png',
-    adsButtonIcon: './ads.png'
+    adsButtonIcon: './ads.png',
+    garbageImg: './garbage.png'
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

@@ -1,5 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money, Stocker } from '../models';
+import { useRef, useEffect, useState } from 'react';
+import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money, Stocker, Garbage } from '../models';
 import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
 import { JoystickOverlay } from '../components/JoystickOverlay';
@@ -11,10 +11,16 @@ export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
   const playerRef = useRef(null);
   const activeRef = useRef(null);
+
+  const collidingGarbageRef = useRef(null);
+  const progressRef = useRef(0);
+  const alertShownRef = useRef(false);
+
   const lastTransferTimeRef = useRef(0);
   const { assets, loaded } = useAssets(assetPaths);
   const { backgroundImg, playerImg, boxImg, generatorImg, itemImg, spotImage, paymentBoxImage, moneyImg,
-    clientImg, cashierImg, stockerImg, configButtonIcon, cartButtonIcon, hatButtonIcon, upgradeButtonIcon, dailyButtonIcon, adsButtonIcon } = assets;
+    clientImg, cashierImg, stockerImg, configButtonIcon, cartButtonIcon, hatButtonIcon, upgradeButtonIcon,
+    dailyButtonIcon, adsButtonIcon, garbageImg } = assets;
   const { active, basePos, stickPos, directionRef, handlers, radius } = useJoystick(60);
   const maxClients = 5;
   const intervalsAddClients = [3000, 5000, 7000, 9000];
@@ -133,6 +139,7 @@ export function GameCanvas({ assetPaths }) {
     ];
 
     const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
+    const garbage = new Garbage(250, 125, 64, 64, garbageImg);
     const clients = [];
     const generators = [];
     const boxes = [];
@@ -156,6 +163,9 @@ export function GameCanvas({ assetPaths }) {
     spawnRandom();
 
     let animationFrameId;
+
+    const maxProgress = 100;
+    const progressIncrement = 1;
 
     const loop = () => {
       const player = playerRef.current;
@@ -290,6 +300,22 @@ export function GameCanvas({ assetPaths }) {
           }
         }
       });
+
+      if (garbage.checkCollision(player)) {
+        collidingGarbageRef.current = garbage;
+        if (!alertShownRef.current) {
+          progressRef.current += progressIncrement;
+          if (progressRef.current >= maxProgress) {
+            garbage.removeItens(player);
+            alertShownRef.current = true;
+            progressRef.current = maxProgress;
+          }
+        }
+      } else {
+        collidingGarbageRef.current = null;
+        progressRef.current = 0;
+        alertShownRef.current = false;
+      }
       
       const viewportWidth = canvas.width / (window.devicePixelRatio || 1);
       const viewportHeight = canvas.height / (window.devicePixelRatio || 1);
@@ -310,6 +336,18 @@ export function GameCanvas({ assetPaths }) {
         viewportWidth, viewportHeight
       );
 
+      if (collidingGarbageRef.current) {
+        const drawX = collidingGarbageRef.current.x - cameraX;
+        const drawY = collidingGarbageRef.current.y - cameraY;
+
+        ctx.fillStyle = "rgba(0, 46, 114, 0.5)";
+        ctx.fillRect(drawX, drawY - 20, collidingGarbageRef.current.width, 10);
+
+        ctx.fillStyle = "rgba(5, 83, 228, 0.7)";
+        const width = (collidingGarbageRef.current.width * progressRef.current) / maxProgress;
+        ctx.fillRect(drawX, drawY - 20, width, 10);
+      }
+
       stockers.forEach(stocker => stocker.update(generators, boxes));
       constructionSpots.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
 
@@ -318,6 +356,7 @@ export function GameCanvas({ assetPaths }) {
         ...generators,
         ...clients,
         ...stockers,
+        garbage,
         player,
         paymentBox,
       ];

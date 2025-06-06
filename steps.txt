@@ -13,9 +13,10 @@
 [ ✅ ] - Ajudante de Caixa
 [ ✅ ] - Ajudante de Itens 
 [ ✅ ] - HUD
-[  ] - Lixeira
+[ ✅ ] - Lixeira
 [  ] - Salvamento Automatico
 [  ] - Ajudante estamina
+[  ] - Ajudante leva pra lixeira
 
 
 # A cada cada caixa nova o limite de player aumenta em 2
