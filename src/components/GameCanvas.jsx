@@ -6,6 +6,7 @@ import { JoystickOverlay } from '../components/JoystickOverlay';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import Cashier from '../models/Cashier';
 import { drawMoneyHud, drawActionButton } from '../utils/drawMoneyHud';
+import { save, load } from '../utils/saveGame'
 
 export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
@@ -124,9 +125,22 @@ export function GameCanvas({ assetPaths }) {
 
     const WORLD_SIZE = 2000;
 
-    playerRef.current = new Player(100, 100, 3, playerImg, 32, 32);
-    playerRef.current.drawWidth = 64; // remover futuramente e fazer sprites com 64 por 64
-    playerRef.current.drawHeight = 64; // remover futuramente e fazer sprites com 64 por 64
+    const loadedData = load('game1');
+    let initialX = 100;
+    let initialY = 100;
+    let initialMoney = 0;
+    
+    if (loadedData) {
+      const { money, playerX, playerY } = loadedData;
+      if (typeof playerX === 'number') initialX = playerX;
+      if (typeof playerY === 'number') initialY = playerY;
+      if (typeof money === 'number') initialMoney = money;
+    }
+    
+    playerRef.current = new Player(initialX, initialY, 3, playerImg, 32, 32);
+    playerRef.current.money = initialMoney;
+    playerRef.current.drawWidth = 64;
+    playerRef.current.drawHeight = 64;
 
     const constructionSpots = [
       new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
@@ -365,7 +379,9 @@ export function GameCanvas({ assetPaths }) {
         renderObjects.push(cashier);
         cashier.update({ x: 35, y: 410 });
       }
-      
+
+      save('game1', playerRef.current.money, playerRef.current.x, playerRef.current.y, ['Cashier1'], ['Stocker1'], ['Genertaor1'], ['Box1'], ['Spot1']);
+
       renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
       renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));
 
