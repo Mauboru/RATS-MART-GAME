@@ -68,7 +68,7 @@ export function GameCanvas({ assetPaths }) {
 
   // salvando o jogo ao sair da tela
   useEffect(() => {
-    const handleSaveBeforeUnload = () => {
+    const saveGameData = () => {
       save(
         'game1',
         playerRef.current.money,
@@ -76,15 +76,22 @@ export function GameCanvas({ assetPaths }) {
         playerRef.current.y,
         ['Cashier1'],
         ['Stocker1'],
-        ['Gene444444444444rator1'],
+        ['Generator1'],
         ['Box1'],
         constructionSpotsRef.current
       );
     };
+  
+    // 1. Salvar ao recarregar/fechar a página
+    const handleSaveBeforeUnload = () => saveGameData();
     window.addEventListener('beforeunload', handleSaveBeforeUnload);
+  
+    // 2. Salvar a cada 1 minuto (60000 milissegundos)
+    const intervalId = setInterval(saveGameData, 60000);
   
     return () => {
       window.removeEventListener('beforeunload', handleSaveBeforeUnload);
+      clearInterval(intervalId); // Limpar o intervalo quando o componente desmontar
     };
   }, []);
 
