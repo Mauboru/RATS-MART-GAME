@@ -148,7 +148,7 @@ export function GameCanvas({ assetPaths }) {
 
     const WORLD_SIZE = 2000;
 
-    const loadedData = null;
+    const loadedData = load('game1');
 
     let initialX = 100;
     let initialY = 100;
