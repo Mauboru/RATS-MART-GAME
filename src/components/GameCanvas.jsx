@@ -12,6 +12,7 @@ export function GameCanvas({ assetPaths }) {
   const canvasRef = useRef(null);
   const playerRef = useRef(null);
   const activeRef = useRef(null);
+  const constructionSpotsRef = useRef([]);
 
   const collidingGarbageRef = useRef(null);
   const progressRef = useRef(0);
@@ -62,6 +63,28 @@ export function GameCanvas({ assetPaths }) {
     return () => {
       window.removeEventListener('touchstart', handleFullscreen);
       window.removeEventListener('click', handleFullscreen);
+    };
+  }, []);
+
+  // salvando o jogo ao sair da tela
+  useEffect(() => {
+    const handleSaveBeforeUnload = () => {
+      save(
+        'game1',
+        playerRef.current.money,
+        playerRef.current.x,
+        playerRef.current.y,
+        ['Cashier1'],
+        ['Stocker1'],
+        ['Gene444444444444rator1'],
+        ['Box1'],
+        constructionSpotsRef.current
+      );
+    };
+    window.addEventListener('beforeunload', handleSaveBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('beforeunload', handleSaveBeforeUnload);
     };
   }, []);
 
@@ -125,16 +148,16 @@ export function GameCanvas({ assetPaths }) {
 
     const WORLD_SIZE = 2000;
 
-    const loadedData = load('game1');
+    const loadedData = null;
+
     let initialX = 100;
     let initialY = 100;
-    let initialMoney = 0;
+    let initialMoney = 200;
     
     if (loadedData) {
-      const { money, playerX, playerY } = loadedData;
-      if (typeof playerX === 'number') initialX = playerX;
-      if (typeof playerY === 'number') initialY = playerY;
-      if (typeof money === 'number') initialMoney = money;
+      if (typeof loadedData.playerX === 'number') initialX = loadedData.playerX;
+      if (typeof loadedData.playerY === 'number') initialY = loadedData.playerY;
+      if (typeof loadedData.money === 'number') initialMoney = loadedData.money;
     }
     
     playerRef.current = new Player(initialX, initialY, 3, playerImg, 32, 32);
@@ -142,15 +165,37 @@ export function GameCanvas({ assetPaths }) {
     playerRef.current.drawWidth = 64;
     playerRef.current.drawHeight = 64;
 
-    const constructionSpots = [
-      new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
-      new ConstructionSpot(300, 200, 64, 64, 300, spotImage, 1, false),
-      new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
-      new ConstructionSpot(300, 420, 64, 64, 150, spotImage, 2, false),
-      new ConstructionSpot(400, 420, 64, 64, 250, spotImage, 2, false),
-      new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, false),
-      new ConstructionSpot(55, 520, 64, 64, 100, spotImage, 4, false),
-    ];
+    function createDefaultSpots() {
+      return [
+        new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
+        new ConstructionSpot(300, 200, 64, 64, 300, spotImage, 1, false),
+        new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
+        new ConstructionSpot(300, 420, 64, 64, 150, spotImage, 2, false),
+        new ConstructionSpot(400, 420, 64, 64, 250, spotImage, 2, false),
+        new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, false),
+        new ConstructionSpot(55, 520, 64, 64, 100, spotImage, 4, false),
+      ];
+    }
+
+    if (loadedData && Array.isArray(loadedData.spots) && loadedData.spots.length > 0) {
+      constructionSpotsRef.current = loadedData.spots.map(spotData => 
+        new ConstructionSpot(
+          spotData.x,
+          spotData.y,
+          spotData.width,
+          spotData.height,
+          spotData.cost,
+          spotImage,
+          spotData.type,
+          spotData.isVisible ?? true,
+          spotData.isBuilt ?? false,
+          spotData.incomingMoneys ?? [],
+          spotData.transferTimer ?? 0
+        )
+      );
+    } else {
+      constructionSpotsRef.current = createDefaultSpots();
+    }
 
     const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
     const garbage = new Garbage(250, 125, 64, 64, garbageImg);
@@ -256,7 +301,7 @@ export function GameCanvas({ assetPaths }) {
       
       paymentBox.updateMovingMoneys(player);
 
-      constructionSpots.forEach(spot => {
+      constructionSpotsRef.current.forEach(spot => {
         spot.updateIncomingMoneys();
       
         if (!spot.transferTimer) spot.transferTimer = 0;
@@ -303,12 +348,12 @@ export function GameCanvas({ assetPaths }) {
               break;
           }
       
-          const allVisibleBuilt = constructionSpots
+          const allVisibleBuilt = constructionSpotsRef.current
             .filter(s => s.isVisible)
             .every(s => s.isBuilt);
       
           if (allVisibleBuilt) {
-            constructionSpots
+            constructionSpotsRef.current
               .filter(s => !s.isVisible)
               .forEach(s => { s.isVisible = true; });
           }
@@ -363,7 +408,7 @@ export function GameCanvas({ assetPaths }) {
       }
 
       stockers.forEach(stocker => stocker.update(generators, boxes));
-      constructionSpots.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
+      constructionSpotsRef.current.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
 
       const renderObjects = [
         ...boxes,
@@ -380,13 +425,11 @@ export function GameCanvas({ assetPaths }) {
         cashier.update({ x: 35, y: 410 });
       }
 
-      save('game1', playerRef.current.money, playerRef.current.x, playerRef.current.y, ['Cashier1'], ['Stocker1'], ['Genertaor1'], ['Box1'], ['Spot1']);
-
       renderObjects.sort((a, b) => a.getBaseY() - b.getBaseY());
       renderObjects.forEach(obj => obj.draw(ctx, cameraX, cameraY));
 
       const allIncomingMoney = [];
-      constructionSpots.forEach(spot => allIncomingMoney.push(...spot.incomingMoneys));
+      constructionSpotsRef.current.forEach(spot => allIncomingMoney.push(...spot.incomingMoneys));
       allIncomingMoney.forEach(money => money.draw(ctx, cameraX, cameraY));
 
       drawMoneyHud(ctx, player.money, 0, viewportWidth);
