@@ -90,7 +90,7 @@ export function GameCanvas({ assetPaths }) {
 
   // Lógica geral do jogo
   useEffect(() => {
-    localStorage.clear();
+    // localStorage.clear();
     if (!loaded) return;
 
     const canvas = canvasRef.current;
