@@ -39,6 +39,14 @@ export default class Box {
     return this.y + this.height;
   }
 
+  getTotalItems() {
+    return this.items;
+  }
+
+  setItems(items) {
+    this.items = items;
+  }
+
   draw(ctx, cameraX, cameraY) {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;
@@ -48,6 +56,13 @@ export default class Box {
     const itemSize = 16;
     const padding = 4;
     const cols = Math.floor(this.width / (itemSize + padding));
+
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    const textX = this.x + this.width / 2 - cameraX;
+    const textY = this.y + this.height + 18 - cameraY;
+    ctx.fillText(`${this.items.length}`, textX, textY);
     
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];

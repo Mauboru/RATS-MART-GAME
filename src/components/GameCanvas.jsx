@@ -13,6 +13,7 @@ export function GameCanvas({ assetPaths }) {
   const playerRef = useRef(null);
   const activeRef = useRef(null);
   const constructionSpotsRef = useRef([]);
+  const boxesRef = useRef([]);
 
   const collidingGarbageRef = useRef(null);
   const progressRef = useRef(0);
@@ -69,6 +70,11 @@ export function GameCanvas({ assetPaths }) {
   // salvando o jogo ao sair da tela
   useEffect(() => {
     const saveGameData = () => {
+      const serializedBoxes = boxesRef.current.map(box => ({
+        ...box,
+        itemCount: box.items?.length ?? 0
+      }));
+    
       save(
         'game1',
         playerRef.current.money,
@@ -77,7 +83,7 @@ export function GameCanvas({ assetPaths }) {
         ['Cashier1'],
         ['Stocker1'],
         ['Generator1'],
-        ['Box1'],
+        serializedBoxes,
         constructionSpotsRef.current
       );
     };
@@ -87,7 +93,7 @@ export function GameCanvas({ assetPaths }) {
     window.addEventListener('beforeunload', handleSaveBeforeUnload);
   
     // 2. Salvar a cada 1 minuto (60000 milissegundos)
-    const intervalId = setInterval(saveGameData, 60000);
+    const intervalId = setInterval(saveGameData, 1000);
   
     return () => {
       window.removeEventListener('beforeunload', handleSaveBeforeUnload);
@@ -210,6 +216,7 @@ export function GameCanvas({ assetPaths }) {
     const clients = [];
     const generators = [];
     const boxes = [];
+    boxesRef.current = boxes;
     const stockers = [];
     let cashier = null;
 
@@ -342,7 +349,20 @@ export function GameCanvas({ assetPaths }) {
               generators.push(new GeneratorObject(spot.x, spot.y, spot.width, spot.height, generatorImg, itemImg, 200));
               break;
             case 2:
-              boxes.push(new Box(spot.x, spot.y + 100, spot.width, spot.height, boxImg));
+              const boxX = spot.x;
+              const boxY = spot.y + 100;
+            
+              const newBox = new Box(boxX, boxY, spot.width, spot.height, boxImg);
+              const savedBox = loadedData.boxes?.find(b => b.x === boxX && b.y === boxY);
+            
+              if (savedBox && savedBox.items) {
+                newBox.items = savedBox.items.map(item => ({
+                  ...item,
+                  sprite: itemImg
+                }));
+              }
+            
+              boxes.push(newBox);
               break;
             case 3:
               cashier = new Cashier(0, 0, 1.8, cashierImg, 32, 32);

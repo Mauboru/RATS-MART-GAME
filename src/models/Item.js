@@ -1,10 +1,11 @@
 export default class Item {
-  constructor(x, y, width, height, sprite) {
+  constructor(x, y, width, height, sprite, type) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.sprite = sprite;
+    this.type = type;
   }
 
   draw(ctx, cameraX, cameraY) {
