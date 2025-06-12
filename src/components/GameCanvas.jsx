@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Money, Stocker, Garbage } from '../models';
 import { useAssets } from '../hooks/useAssets';
 import { useJoystick } from '../hooks/useJoystick';
@@ -14,6 +14,7 @@ export function GameCanvas({ assetPaths }) {
   const activeRef = useRef(null);
   const constructionSpotsRef = useRef([]);
   const boxesRef = useRef([]);
+  const paymentBoxRef = useRef(null);
 
   const collidingGarbageRef = useRef(null);
   const progressRef = useRef(0);
@@ -80,9 +81,7 @@ export function GameCanvas({ assetPaths }) {
         playerRef.current.money,
         playerRef.current.x,
         playerRef.current.y,
-        ['Cashier1'],
-        ['Stocker1'],
-        ['Generator1'],
+        { money: paymentBoxRef.current?.money ?? 0 },
         serializedBoxes,
         constructionSpotsRef.current
       );
@@ -212,6 +211,12 @@ export function GameCanvas({ assetPaths }) {
     }
 
     const paymentBox = new PaymentBox(25, 350, 128, 64, moneyImg, paymentBoxImage);
+    paymentBoxRef.current = paymentBox;
+    if (loadedData && loadedData.paymentBox && typeof loadedData.paymentBox.money === 'number') {
+      paymentBoxRef.current?.setMoney(loadedData.paymentBox.money);
+      paymentBoxRef.current.rebuildMoneyStack();
+    }
+
     const garbage = new Garbage(250, 125, 64, 64, garbageImg);
     const clients = [];
     const generators = [];

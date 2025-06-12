@@ -24,6 +24,34 @@ export default class PaymentBox {
     };
   }
 
+  setMoney(money) {
+    this.money = money;
+  }
+
+  rebuildMoneyStack() {
+    this.generatedMoneys = [];
+  
+    const count = Math.min(this.money, this.maxMoneys);
+  
+    for (let i = 0; i < count; i++) {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+  
+      const offsetX = (col - 1) * 20;
+      const offsetY = -row * 10;
+  
+      const newMoney = new Money(
+        this.x + this.width / 2 + offsetX - 16, 
+        this.y + offsetY,
+        32,
+        32,
+        this.moneyImg
+      );
+  
+      this.generatedMoneys.push(newMoney);
+    }
+  }
+
   updateMovingMoneys(player) {
     for (let i = this.movingMoneys.length - 1; i >= 0; i--) {
       const m = this.movingMoneys[i];

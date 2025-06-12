@@ -14,7 +14,7 @@
 [ ✅ ] - Ajudante de Itens 
 [ ✅ ] - HUD
 [ ✅ ] - Lixeira
-[  ] - Salvamento Automatico
+[ ✅ ] - Salvamento Automatico
 [  ] - Ajudante estamina
 [  ] - Ajudante leva pra lixeira
 

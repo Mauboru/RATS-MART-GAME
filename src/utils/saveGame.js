@@ -1,5 +1,5 @@
-export function save(key, money, playerX, playerY, cashier, stocker, generatorObjects, boxes, spots) {
-  const data = { money, playerX, playerY, cashier, stocker, generatorObjects, boxes, spots};
+export function save(key, money, playerX, playerY, paymentBox, boxes, spots) {
+  const data = { money, playerX, playerY, paymentBox, boxes, spots};
   localStorage.setItem(key, JSON.stringify(data));
 }
 
