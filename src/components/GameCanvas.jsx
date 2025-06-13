@@ -180,13 +180,13 @@ export function GameCanvas({ assetPaths }) {
 
     function createDefaultSpots() {
       return [
-        new ConstructionSpot(200, 200, 64, 64, 100, spotImage, 1),
-        new ConstructionSpot(300, 200, 64, 64, 300, spotImage, 1, false),
-        new ConstructionSpot(200, 420, 64, 64, 100, spotImage, 2),
-        new ConstructionSpot(300, 420, 64, 64, 150, spotImage, 2, false),
-        new ConstructionSpot(400, 420, 64, 64, 250, spotImage, 2, false),
-        new ConstructionSpot(55, 420, 64, 64, 200, spotImage, 3, false),
-        new ConstructionSpot(55, 520, 64, 64, 100, spotImage, 4, false),
+        new ConstructionSpot(200, 200, 64, 64, 1, spotImage, 1),
+        new ConstructionSpot(300, 200, 64, 64, 3, spotImage, 1, false),
+        new ConstructionSpot(200, 420, 64, 64, 1, spotImage, 2),
+        new ConstructionSpot(300, 420, 64, 64, 1, spotImage, 2, false),
+        new ConstructionSpot(400, 420, 64, 64, 2, spotImage, 2, false),
+        new ConstructionSpot(55, 420, 64, 64, 2, spotImage, 3, false),
+        new ConstructionSpot(55, 520, 64, 64, 1, spotImage, 4, false),
       ];
     }
 
@@ -392,6 +392,12 @@ export function GameCanvas({ assetPaths }) {
           }
         }
       });
+
+      const collidingStocker = stockers.find(stocker => stocker.checkCollisionWithPlayer(player));
+      if (collidingStocker && collidingStocker.state == "tired") {
+        collidingStocker.state = "idle";
+        collidingStocker.timerStamina = 2000;
+      }
 
       if (garbage.checkCollision(player)) {
         collidingGarbageRef.current = garbage;

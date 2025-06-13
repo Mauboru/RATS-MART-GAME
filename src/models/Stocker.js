@@ -9,6 +9,8 @@ export default class Stocker extends Entidade {
 
         this.direction = { x: 0, y: 0 };
         this.state = 'idle';
+        this.timerStaminaMax = 1000; //3000
+        this.timerStamina = this.timerStaminaMax;
 
         this.width = frameWidth;
         this.height = frameHeight;
@@ -21,6 +23,11 @@ export default class Stocker extends Entidade {
     }
 
     update(generators, boxes) {
+        if (this.timerStamina <= 0) {
+            this.state = "tired";
+        } else {
+            this.timerStamina--;
+        }
         if (this.direction.x > 0) this.facing = 'right';
         else if (this.direction.x < 0) this.facing = 'left';
 
@@ -80,9 +87,22 @@ export default class Stocker extends Entidade {
                     this.state = 'depositing';
                 }
                 break;
+            
+            case 'tired':
+                //aqui muda a sprite
+                break;
         }
         this.updateAnimation();
     }
+
+    checkCollisionWithPlayer(player) {
+        return (
+            player.x < (this.x - 32) + this.width &&
+            player.x + player.drawWidth > (this.x + 32) &&
+            player.y < (this.y - 32) + this.height &&
+            player.y + player.drawHeight > (this.y + 32)
+        );
+      }
 
     chooseGenerator(generators) {
         // Escolhe o gerador com mais itens ou aleatório.
@@ -128,7 +148,29 @@ export default class Stocker extends Entidade {
     }
 
     draw(ctx, cameraX, cameraY) {
-        const row = this.state === 'idle' ? 0 : 1;
+        let row;
+        
+        switch (this.state) {
+        case 'idle':
+            row = 0;
+            break;
+        case 'tired':
+            row = 2; // exemplo: linha 2 da spritesheet é a sprite de cansado
+            break;
+        default:
+            row = 1; // movimentação ou outro estado padrão
+            break;
+        }
+
+
+        ctx.fillStyle = 'white';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        const textX = this.x + this.width / 2 - cameraX;
+        const textY = this.y + this.height + 58 - cameraY;
+        ctx.fillText(`${this.timerStamina}`, textX, textY);
+        ctx.fillText(`${this.state}`, textX, textY + 20);
+
         super.draw(ctx, cameraX, cameraY, row, this.items);
     }
 }

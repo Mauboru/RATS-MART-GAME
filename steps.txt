@@ -15,8 +15,9 @@
 [ ✅ ] - HUD
 [ ✅ ] - Lixeira
 [ ✅ ] - Salvamento Automatico
-[  ] - Ajudante estamina
+[ ✅ ] - Ajudante estamina
 [  ] - Ajudante leva pra lixeira
 
 
 # A cada cada caixa nova o limite de player aumenta em 2
+# ao criar as duas caixas e pagar na segunda caixa o jogo trava
