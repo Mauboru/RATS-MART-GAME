@@ -446,7 +446,7 @@ export function GameCanvas({ assetPaths }) {
         ctx.fillRect(drawX, drawY - 20, width, 10);
       }
 
-      stockers.forEach(stocker => stocker.update(generators, boxes));
+      stockers.forEach(stocker => stocker.update(generators, boxes, garbage));
       constructionSpotsRef.current.forEach(spot => { if (!spot.isBuilt) { spot.draw(ctx, cameraX, cameraY) } });
 
       const renderObjects = [

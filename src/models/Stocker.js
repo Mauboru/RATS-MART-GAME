@@ -4,94 +4,130 @@ export default class Stocker extends Entidade {
     constructor(x, y, speed, spriteSheet, frameWidth, frameHeight) {
         super(x, y, speed, spriteSheet, frameWidth, frameHeight);
 
-        this.frameCount = 4;   
-        this.frameDelay = 8;  
+        this.frameCount = 4;
+        this.frameDelay = 8;
 
         this.direction = { x: 0, y: 0 };
         this.state = 'idle';
-        this.timerStaminaMax = 1000; //3000
+        this.timerStaminaMax = 1000;
         this.timerStamina = this.timerStaminaMax;
 
         this.width = frameWidth;
         this.height = frameHeight;
-        
+
         this.generatorTarget = null;
-        this.boxTarget = null;       
-        this.itemsCollected = 0;     
-        this.maxItems = 3;   
+        this.boxTarget = null;
+        this.maxItems = 3;
         this.items = [];
     }
 
-    update(generators, boxes) {
+    update(generators, boxes, garbage) {
         if (this.timerStamina <= 0) {
             this.state = "tired";
         } else {
             this.timerStamina--;
         }
+
         if (this.direction.x > 0) this.facing = 'right';
         else if (this.direction.x < 0) this.facing = 'left';
 
         switch (this.state) {
             case 'idle':
-                this.chooseGenerator(generators);
+                if (this.hasAvailableBox(boxes)) {
+                    this.chooseGenerator(generators);
+                } else {
+                    this.state = 'waiting';
+                }
                 break;
-    
+
             case 'movingToGenerator':
                 this.moveTo(this.generatorTarget);
                 if (this.isAtTarget(this.generatorTarget, 55)) {
                     this.state = 'collecting';
                 }
                 break;
-    
+
             case 'collecting':
                 if (this.generatorTarget.hasItem() && this.items.length < this.maxItems) {
                     const item = this.generatorTarget.takeItem();
                     if (item) this.items.push(item);
+
                     if (this.items.length >= this.maxItems) {
-                    this.chooseBox(boxes);
+                        this.chooseBox(boxes);
                     }
                 } else {
                     this.state = 'waiting';
                 }
-            break;
-    
+                break;
+
             case 'movingToBox':
                 this.moveTo(this.boxTarget);
                 if (this.isAtTarget(this.boxTarget, 45)) {
                     this.state = 'depositing';
                 }
                 break;
-    
+
             case 'depositing':
                 if (this.boxTarget && !this.boxTarget.isFull() && this.items.length > 0) {
                     const item = this.items.pop();
                     this.boxTarget.addItem(item);
+
                     if (this.items.length <= 0) {
-                    this.chooseGenerator(generators);
+                        this.chooseGenerator(generators);
                     }
                 } else {
                     const otherBox = this.findOtherBox(boxes);
                     if (otherBox) {
-                    this.boxTarget = otherBox;
-                    this.state = 'movingToBox';
+                        this.boxTarget = otherBox;
+                        this.state = 'movingToBox';
+                    } else if (this.items.length > 0) {
+                        this.state = 'movingToGarbage';
                     } else {
-                    this.state = 'waiting';
+                        this.state = 'waiting';
                     }
                 }
                 break;
-    
+
             case 'waiting':
-                if (this.generatorTarget && this.generatorTarget.hasItem()) {
-                    this.state = 'collecting';
-                } else if (this.boxTarget && !this.boxTarget.isFull() && this.itemsCollected > 0) {
-                    this.state = 'depositing';
+                if (this.items.length > 0) {
+                    if (this.hasAvailableBox(boxes)) {
+                        this.chooseBox(boxes);
+                    } else {
+                        this.state = 'movingToGarbage';
+                    }
+                } else {
+                    if (this.hasAvailableBox(boxes)) {
+                        this.chooseGenerator(generators);
+                    }
                 }
                 break;
-            
+
+            case 'movingToGarbage':
+                this.moveTo(garbage);
+                if (this.isAtTarget(garbage, 5)) {
+                    this.state = 'discard';
+                }
+                break;
+
+            case 'discard':
+                if (garbage && this.items.length > 0) {
+                    this.items.pop();
+                }
+
+                if (this.items.length <= 0) {
+                    if (this.hasAvailableBox(boxes)) {
+                        this.chooseGenerator(generators);
+                    } else {
+                        this.state = 'waiting';
+                    }
+                }
+                break;
+
             case 'tired':
-                //aqui muda a sprite
+                // Sprite muda aqui
                 break;
         }
+
         this.updateAnimation();
     }
 
@@ -102,29 +138,31 @@ export default class Stocker extends Entidade {
             player.y < (this.y - 32) + this.height &&
             player.y + player.drawHeight > (this.y + 32)
         );
-      }
+    }
 
     chooseGenerator(generators) {
-        // Escolhe o gerador com mais itens ou aleatório.
         this.generatorTarget = generators[Math.floor(Math.random() * generators.length)];
         this.state = 'movingToGenerator';
     }
-    
+
     chooseBox(boxes) {
-        // Escolhe primeira caixa não cheia.
         const box = boxes.find(b => !b.isFull());
         if (box) {
             this.boxTarget = box;
             this.state = 'movingToBox';
         } else {
-            this.state = 'waiting';
+            this.state = 'movingToGarbage';
         }
     }
-    
+
+    hasAvailableBox(boxes) {
+        return boxes.some(b => !b.isFull());
+    }
+
     findOtherBox(boxes) {
         return boxes.find(b => b !== this.boxTarget && !b.isFull());
     }
-    
+
     moveTo(target) {
         const dx = target.x - this.x;
         const dy = target.y - this.y;
@@ -133,12 +171,11 @@ export default class Stocker extends Entidade {
             this.direction = { x: dx / distance, y: dy / distance };
             this.x += this.direction.x * this.speed;
             this.y += this.direction.y * this.speed;
-            this.state = this.state.includes('Box') ? 'movingToBox' : 'movingToGenerator';
         } else {
             this.direction = { x: 0, y: 0 };
         }
     }
-    
+
     isAtTarget(target, buffer = 10) {
         return Math.hypot(target.x - this.x, target.y - this.y) < buffer;
     }
@@ -149,27 +186,18 @@ export default class Stocker extends Entidade {
 
     draw(ctx, cameraX, cameraY) {
         let row;
-        
+
         switch (this.state) {
-        case 'idle':
-            row = 0;
-            break;
-        case 'tired':
-            row = 2; // exemplo: linha 2 da spritesheet é a sprite de cansado
-            break;
-        default:
-            row = 1; // movimentação ou outro estado padrão
-            break;
+            case 'idle':
+                row = 0;
+                break;
+            case 'tired':
+                row = 2;
+                break;
+            default:
+                row = 1;
+                break;
         }
-
-
-        ctx.fillStyle = 'white';
-        ctx.font = '16px Arial';
-        ctx.textAlign = 'center';
-        const textX = this.x + this.width / 2 - cameraX;
-        const textY = this.y + this.height + 58 - cameraY;
-        ctx.fillText(`${this.timerStamina}`, textX, textY);
-        ctx.fillText(`${this.state}`, textX, textY + 20);
 
         super.draw(ctx, cameraX, cameraY, row, this.items);
     }
