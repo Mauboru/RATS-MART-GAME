@@ -7,7 +7,7 @@ export function useAssets(assetPaths) {
 
   useEffect(() => {
     const keys = Object.keys(assetPaths);
-    const images = {};
+    const loadedAssets = {};
     let loadedCount = 0;
     let errorFound = false;
 
@@ -19,25 +19,48 @@ export function useAssets(assetPaths) {
     }
 
     keys.forEach(key => {
-      const img = new Image();
-      img.onload = () => {
-        images[key] = img;
+      const path = assetPaths[key];
+      const extension = path.split('.').pop().toLowerCase();
+
+      if (['png', 'jpg', 'jpeg', 'gif'].includes(extension)) {
+        const img = new Image();
+        img.onload = () => {
+          loadedAssets[key] = img;
+          loadedCount++;
+          checkCompletion();
+        };
+        img.onerror = () => {
+          errorFound = true;
+          loadedCount++;
+          checkCompletion();
+        };
+        img.src = path;
+      } else if (['mp3', 'wav', 'ogg'].includes(extension)) {
+        const audio = new Audio();
+        audio.onloadeddata = () => {
+          loadedAssets[key] = audio;
+          loadedCount++;
+          checkCompletion();
+        };
+        audio.onerror = () => {
+          errorFound = true;
+          loadedCount++;
+          checkCompletion();
+        };
+        audio.src = path;
+        audio.load(); // Garante pré-carregamento
+      } else {
+        console.warn(`Tipo de arquivo não suportado: ${path}`);
         loadedCount++;
         checkCompletion();
-      };
-      img.onerror = () => {
-        errorFound = true;
-        loadedCount++;
-        checkCompletion();
-      };
-      img.src = assetPaths[key];
+      }
     });
 
     function checkCompletion() {
       if (loadedCount === keys.length) {
         setError(errorFound);
         if (!errorFound) {
-          setAssets(images);
+          setAssets(loadedAssets);
           setLoaded(true);
         } else {
           setLoaded(false);
@@ -45,5 +68,6 @@ export function useAssets(assetPaths) {
       }
     }
   }, [assetPaths]);
+
   return { assets, loaded, error };
 }

@@ -14,12 +14,14 @@ export default function App() {
     cashierImg: './cashier.png',
     stockerImg: './stocker.png',
     configButtonIcon: './engrenagem.png',
-    cartButtonIcon: './cart.png',
     hatButtonIcon: './hat.png',
     upgradeButtonIcon: './upgrade.png',
     dailyButtonIcon: './daily.png',
-    adsButtonIcon: './ads.png',
-    garbageImg: './garbage.png'
+    garbageImg: './garbage.png',
+
+    // NOVOS SONS:
+    backgroundMusic: './sounds/music.mp3',
+    //pickupSound: './sounds/pickup.wav',
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

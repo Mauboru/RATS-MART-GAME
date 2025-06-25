@@ -4,8 +4,8 @@ export default class Cashier extends Entidade {
   constructor(x, y, speed, spriteSheet, frameWidth, frameHeight) {
     super(x, y, speed, spriteSheet, frameWidth, frameHeight);
 
-    this.frameCount = 4;           // Número de quadros na sprite sheet
-    this.frameDelay = 8;          // Delay entre quadros para controlar a velocidade da animação
+    this.frameCount = 4;
+    this.frameDelay = 8;
 
     this.direction = { x: 0, y: 0 };
     this.state = 'idle';
@@ -16,7 +16,7 @@ export default class Cashier extends Entidade {
 
   update(target) {
     const dx = target.x - this.x;
-    const dy = target.y - this.y;
+    const dy = target.y - this.y + 40;
     const distance = Math.hypot(dx, dy);
 
     if (distance > 1) {

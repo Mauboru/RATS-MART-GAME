@@ -5,6 +5,11 @@ export default class Garbage {
     this.width = width;
     this.height = height;
     this.sprite = sprite;
+
+    this.chargeProgress = 0;
+    this.chargeTime = 300;
+    this.isCharging = false;
+    this.lastChargeTime = 0;
   }
 
   getBaseY() {
@@ -20,6 +25,32 @@ export default class Garbage {
     );
   }
 
+  processPlayerInteraction(player, deltaTime) {
+    if (this.checkCollision(player)) {
+      if (!this.isCharging) {
+        this.isCharging = true;
+        this.lastChargeTime = performance.now();
+      }
+  
+      const now = performance.now();
+      const elapsed = now - this.lastChargeTime;
+      this.chargeProgress += deltaTime;
+  
+      if (this.chargeProgress >= this.chargeTime) {
+        this.removeItens(player);
+        this.resetCharge();
+      }
+    } else {
+      this.resetCharge();
+    }
+  }
+  
+  resetCharge() {
+    this.chargeProgress = 0;
+    this.isCharging = false;
+    this.lastChargeTime = 0;
+  }  
+
   removeItens(entity) {
     entity.items = [];
   }
@@ -27,7 +58,25 @@ export default class Garbage {
   draw(ctx, cameraX, cameraY) {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;
-
+  
     ctx.drawImage(this.sprite, drawX, drawY, this.width, this.height);
+  
+    // Desenhar barra de carregamento se estiver carregando
+    if (this.isCharging) {
+      const barWidth = this.width;
+      const barHeight = 6;
+      const progressRatio = this.chargeProgress / this.chargeTime;
+  
+      // Fundo da barra
+      ctx.fillStyle = "#444";
+      ctx.fillRect(drawX, drawY - 10, barWidth, barHeight);
+  
+      // Progresso
+      ctx.fillStyle = "#0f0";
+      ctx.fillRect(drawX, drawY - 10, barWidth * progressRatio, barHeight);
+  
+      ctx.strokeStyle = "#000";
+      ctx.strokeRect(drawX, drawY - 10, barWidth, barHeight);
+    }
   }
 }

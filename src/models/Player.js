@@ -7,7 +7,7 @@ export default class Player extends Entidade {
     
     this.direction = { x: 0, y: 0 };
     this.state = 'idle';
-    this.money = 200;
+    this.money = 100;
     this.items = [];
     this.maxItems = 6;
 

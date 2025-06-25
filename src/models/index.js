@@ -7,4 +7,7 @@ export { default as Player } from './Player';
 export { default as GeneratorObject } from './GeneratorObjects';
 export { default as Money } from './Money';
 export { default as Stocker } from './Stocker';
+export { default as Renderer } from './Renderer';
+export { default as GameManager } from './GameManager';
 export { default as Garbage } from './Garbage';
+export { default as Cashier } from './Cashier';

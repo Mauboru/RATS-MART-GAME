@@ -5,6 +5,9 @@ export default class ConstructionSpot {
     this.width = width;
     this.height = height;
     this.cost = cost;
+    this.originalCost = cost;
+    this.lastTransferTime = null;
+    this.moneyPool = 0;
     this.image = image;
     this.type = type;
     this.isBuilt = false;
@@ -28,24 +31,24 @@ export default class ConstructionSpot {
   }
 
   updateIncomingMoneys() {
+    const MONEY_SPEED = 4;
+  
     for (let i = this.incomingMoneys.length - 1; i >= 0; i--) {
-      const m = this.incomingMoneys[i];
-      const dx = this.x - m.x;
-      const dy = this.y - m.y;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist > 1) {
-        m.x += (dx / dist) * 2;
-        m.y += (dy / dist) * 2;
-      }
-
-      if (
-        m.x < this.x + this.width &&
-        m.x + m.width > this.x &&
-        m.y < this.y + this.height &&
-        m.y + m.height > this.y
-      ) {
-        this.cost -= 1;
+      const money = this.incomingMoneys[i];
+      
+      // Calcula direção ao centro do spot
+      const targetX = this.x + this.width/2;
+      const targetY = this.y + this.height/2;
+      const dx = targetX - money.x;
+      const dy = targetY - money.y;
+      const distance = Math.sqrt(dx*dx + dy*dy);
+  
+      if (distance > 5) {
+        // Movimento suave
+        money.x += (dx/distance) * MONEY_SPEED;
+        money.y += (dy/distance) * MONEY_SPEED;
+      } else {
+        // Remove a moeda (o valor já foi debitado)
         this.incomingMoneys.splice(i, 1);
       }
     }
@@ -57,16 +60,39 @@ export default class ConstructionSpot {
 
   draw(ctx, cameraX, cameraY) {
     if (!this.isBuilt && this.isVisible && this.image) {
+      // Desenha o spot
       ctx.drawImage(this.image, this.x - cameraX, this.y - cameraY, this.width, this.height);
-    }
-  
-    if (this.isVisible) {
+    
+      // Desenha as moedas em movimento
+      this.incomingMoneys.forEach(money => {
+        money.draw(ctx, cameraX, cameraY);
+      });
+    
+      // Texto do custo
       ctx.fillStyle = 'white';
       ctx.font = '16px Arial';
       ctx.textAlign = 'center';
-      const textX = this.x + this.width / 2 - cameraX;
-      const textY = this.y + this.height + 18 - cameraY;
-      ctx.fillText(`$${this.cost}`, textX, textY);
+      ctx.fillText(`$${this.cost}`,
+        this.x + this.width / 2 - cameraX,
+        this.y + this.height + 25 - cameraY);
+    
+      // Barra de progresso (opcional)
+      const progressWidth = 50;
+      const progressHeight = 5;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(
+        this.x + this.width / 2 - progressWidth / 2 - cameraX,
+        this.y + this.height + 5 - cameraY,
+        progressWidth,
+        progressHeight
+      );
+      ctx.fillStyle = 'gold';
+      ctx.fillRect(
+        this.x + this.width / 2 - progressWidth / 2 - cameraX,
+        this.y + this.height + 5 - cameraY,
+        progressWidth * (1 - this.cost / this.originalCost),
+        progressHeight
+      );
     }
   }
 }

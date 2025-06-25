@@ -53,6 +53,57 @@ export default class PaymentBox {
   }
 
   updateMovingMoneys(player) {
+    const BASE_COOLDOWN = 65; // Tempo inicial entre transferências
+    const MIN_COOLDOWN = 12;   // Tempo mínimo (máxima aceleração)
+    const ACCELERATION_RATE = 0.1; // Taxa de aceleração
+  
+    // Verifica colisão com o jogador
+    if (this.checkCollision(player) && this.money > 0) {
+      const now = Date.now();
+  
+      // Inicia o temporizador de aceleração
+      if (!this.collisionStartTime) {
+        this.collisionStartTime = now;
+      }
+      
+      // Calcula duração da colisão em segundos
+      const collisionDuration = (now - this.collisionStartTime) / 1000;
+      
+      // Calcula cooldown dinâmico (diminui com o tempo)
+      const dynamicCooldown = Math.max(
+        MIN_COOLDOWN,
+        BASE_COOLDOWN - (ACCELERATION_RATE * collisionDuration)
+      );
+  
+      // Verifica se pode transferir
+      if (!this.lastTransferTime || now - this.lastTransferTime >= dynamicCooldown) {
+        const moneyToTransfer = Math.min(1, this.money);
+        this.money -= moneyToTransfer;
+        
+        // Cria moeda em movimento
+        const newMoney = new Money(
+          this.x + this.width / 2 - 16,
+          this.y,
+          32,
+          32,
+          this.moneyImg
+        );
+        this.movingMoneys.push(newMoney);
+        
+        // Atualiza pilha visual
+        if (this.generatedMoneys.length > 0) {
+          this.generatedMoneys.pop();
+        }
+        
+        this.lastTransferTime = now;
+      }
+    } else {
+      // Reseta temporizadores quando não há colisão
+      this.collisionStartTime = null;
+      this.lastTransferTime = null;
+    }
+  
+    // Movimenta as moedas em direção ao jogador
     for (let i = this.movingMoneys.length - 1; i >= 0; i--) {
       const m = this.movingMoneys[i];
       
@@ -60,19 +111,18 @@ export default class PaymentBox {
       const dy = player.y - m.y;
       const dist = Math.hypot(dx, dy);
   
+      // Ajusta velocidade baseada na distância (fica mais rápido perto do jogador)
+      const speed = Math.min(5, 2 + (dist * 0.1));
+      
       if (dist > 1) {
-        m.x += (dx / dist) * 2;
-        m.y += (dy / dist) * 2;
+        m.x += (dx / dist) * speed;
+        m.y += (dy / dist) * speed;
       }
   
-      if (
-        m.x < player.x + player.width &&
-        m.x + m.width > player.x &&
-        m.y < player.y + player.height &&
-        m.y + m.height > player.y
-      ) {
-        player.money += 1;  
-        this.movingMoneys.splice(i, 1); 
+      // Verifica colisão com jogador
+      if (player.checkCollision(m)) {
+        player.money += 1;
+        this.movingMoneys.splice(i, 1);
       }
     }
   }

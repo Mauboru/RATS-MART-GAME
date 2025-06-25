@@ -69,19 +69,12 @@ export default class Client extends Entidade {
           this.items = [];
         }
         if (this.moneyToTransfer > 0) {
-          this.transferTimer++;
-          if (this.transferTimer >= this.transferCooldown) {
-            this.paymentBox.addMoney(1);
-            this.moneyToTransfer -= 1;
-            this.transferTimer = 0;
-          }
-        } else {
+          this.paymentBox.addMoney(this.moneyToTransfer);
+          this.moneyToTransfer = 0;
           this.state = 'leaving';
           this.exitX = 0;
           this.exitY = 0;
         }
-      } else {
-        this.transferTimer = 0;
       }
     }
 
