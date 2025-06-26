@@ -29,26 +29,12 @@ export default class GameManager {
   }
 
   update() {
-    this.updateGenerators();
     this.updateBoxes();
     this.updateClients();
     this.updatePaymentBox();
     this.updateConstructionSpots();
     this.updateStockers();
     this.updateCashier();
-  }
-
-  updateGenerators() {
-    this.generators.forEach(generator => {
-      generator.update();
-      generator.generatedItems = generator.generatedItems.filter(item => {
-        if (item.checkCollision(this.player)) {
-          this.player.addItem(item);
-          return false;
-        }
-        return true;
-      });
-    });
   }
 
   updateBoxes() {
@@ -269,9 +255,11 @@ export default class GameManager {
     const initialX = loadedData?.playerX ?? 100;
     const initialY = loadedData?.playerY ?? 100;
     const initialMoney = loadedData?.money ?? 200;
+    const initialMaxItems = loadedData?.maxItems ?? 3;
 
     this.player = new Player(initialX, initialY, 3, this.assets.playerImg, 32, 32);
     this.player.money = initialMoney;
+    this.player.maxItems = initialMaxItems;
     this.player.drawWidth = 64;
     this.player.drawHeight = 64;
 
@@ -372,6 +360,7 @@ export default class GameManager {
       this.player.money,
       this.player.x,
       this.player.y,
+      this.player.maxItems,
       { money: this.paymentBox?.money ?? 0 },
       serializedBoxes,
       this.constructionSpots

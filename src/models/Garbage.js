@@ -32,13 +32,11 @@ export default class Garbage {
         this.lastChargeTime = performance.now();
       }
   
-      const now = performance.now();
-      const elapsed = now - this.lastChargeTime;
       this.chargeProgress += deltaTime;
   
       if (this.chargeProgress >= this.chargeTime) {
         this.removeItens(player);
-        this.resetCharge();
+        this.chargeProgress = this.chargeTime;
       }
     } else {
       this.resetCharge();
@@ -61,17 +59,14 @@ export default class Garbage {
   
     ctx.drawImage(this.sprite, drawX, drawY, this.width, this.height);
   
-    // Desenhar barra de carregamento se estiver carregando
-    if (this.isCharging) {
+    if (this.isCharging && this.chargeProgress !== 300) {
       const barWidth = this.width;
       const barHeight = 6;
       const progressRatio = this.chargeProgress / this.chargeTime;
   
-      // Fundo da barra
       ctx.fillStyle = "#444";
       ctx.fillRect(drawX, drawY - 10, barWidth, barHeight);
   
-      // Progresso
       ctx.fillStyle = "#0f0";
       ctx.fillRect(drawX, drawY - 10, barWidth * progressRatio, barHeight);
   

@@ -46,6 +46,7 @@ export function GameCanvas({ assetPaths }) {
     };
   }, []);
 
+  // Configuração de Audios e Sons
   useEffect(() => {
     const music = assets.backgroundMusic;
   
@@ -68,7 +69,6 @@ export function GameCanvas({ assetPaths }) {
     };
   }, [assets]);
   
-
   // Inicialização do jogo
   useEffect(() => {
     if (!loaded) return;
@@ -82,7 +82,7 @@ export function GameCanvas({ assetPaths }) {
 
     const canvas = canvasRef.current;
     const loadedData = load('game1');
-
+    
     const now = performance.now();
     const deltaTime = now - lastTime;
     lastTime = now;
@@ -92,7 +92,7 @@ export function GameCanvas({ assetPaths }) {
     gameManagerRef.current.initialize(loadedData);
     playerRef.current = gameManagerRef.current.player;
 
-    rendererRef.current = new Renderer(canvas, assets);
+    rendererRef.current = new Renderer(canvas, assets, gameManagerRef.current.player);
     rendererRef.current.setupCanvas();
 
     // Configura o listener de clique
@@ -127,7 +127,7 @@ export function GameCanvas({ assetPaths }) {
       gameManager.generators.forEach(generator => {
         generator.update();
         generator.generatedItems = generator.generatedItems.filter(item => {
-          if (item.checkCollision(player)) {
+          if (item.checkCollision(player) && player.getItem() < player.maxItems) {
             player.addItem(item);
             return false;
           }

@@ -9,10 +9,16 @@ export default class GeneratorObject {
     this.sprite = sprite;
 
     this.itemSprite = itemSprite;
-    this.generatedItems = []; 
+    this.generatedItems = [];
     this.cooldown = itemCooldown;
     this.timer = 0;
     this.maxItems = maxItems;
+
+    this.offsets = [
+      { x: 0, y: 0 },
+      { x: -20, y: -5 },
+      { x: 10, y: -15 },
+    ];
   }
 
   getBaseY() {
@@ -24,27 +30,38 @@ export default class GeneratorObject {
   }
 
   takeItem() {
-    return this.generatedItems.shift(); 
+    return this.generatedItems.shift();
   }
 
   update() {
     this.timer++;
-    if (this.generatedItems.length < this.maxItems && this.timer >= this.cooldown) {
-      const offsets = [
-        { x: 0, y: 0 },
-        { x: -20, y: -5 },
-        { x: 10, y: -15 },
-      ];
-  
-      const index = this.generatedItems.length; 
-      const offset = offsets[index] || { x: 0, y: 0 };
-      const newItem = new Item(this.x + this.width / 2 + offset.x, this.y + this.height / 2 + offset.y, 16, 16, this.itemSprite);
-      
+    const usedSlots = this.generatedItems.map(item => item.slotIndex);
+    const availableSlots = this.offsets
+      .map((offset, index) => index)
+      .filter(index => !usedSlots.includes(index));
+
+    if (availableSlots.length === 0) {
+      this.timer = 0;
+      return;
+    }
+
+    if (this.timer >= this.cooldown) {
+      const slotIndex = availableSlots[0]; 
+      const offset = this.offsets[slotIndex];
+
+      const newItem = new Item(
+        this.x + this.width / 2 + offset.x,
+        this.y + this.height / 2 + offset.y,
+        16, 16,
+        this.itemSprite
+      );
+      newItem.slotIndex = slotIndex;
+
       this.generatedItems.push(newItem);
       this.timer = 0;
     }
   }
-  
+
   draw(ctx, cameraX, cameraY) {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;

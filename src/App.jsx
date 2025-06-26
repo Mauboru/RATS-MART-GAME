@@ -22,6 +22,11 @@ export default function App() {
     // NOVOS SONS:
     backgroundMusic: './sounds/music.mp3',
     //pickupSound: './sounds/pickup.wav',
+
+    // ... outros assets
+    upgradeIcon: './upgrade-icon.png',
+    bagIcon: './bag-icon.png',        
+    moneyIcon: './money-icon.png',
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

@@ -9,7 +9,7 @@ export default class Player extends Entidade {
     this.state = 'idle';
     this.money = 100;
     this.items = [];
-    this.maxItems = 6;
+    this.maxItems = 3;
 
     this.collisionRegion = { 
       x: 15, 
@@ -50,6 +50,10 @@ export default class Player extends Entidade {
     if (this.items.length < this.maxItems) {
       this.items.push(item);
     }
+  }
+
+  getItem() {
+    return this.items.length;
   }
 
   draw(ctx, cameraX, cameraY) {

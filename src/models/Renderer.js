@@ -1,7 +1,8 @@
 import { drawMoneyHud, drawActionButton } from '../utils/drawMoneyHud';
+import UpgradeWindow from './UpgradeWindow';
 
 export default class Renderer {
-    constructor(canvas, assets) {
+    constructor(canvas, assets, player) {
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
       this.assets = assets;
@@ -9,8 +10,10 @@ export default class Renderer {
       this.buttonSize = 45;
       this.padding = 10;
       this.buttons = this.createButtons();
+
+      this.upgradeWindow = new UpgradeWindow(player, this.assets);
     }
-  
+
     createButtons() {
       const icons = [
         this.assets.configButtonIcon,
@@ -21,7 +24,7 @@ export default class Renderer {
     
       const actions = [
         () => alert('Config clicado!'),
-        () => alert('Upgrade clicado!'),
+        () => this.upgradeWindow.toggle(),
         () => alert('Chapéu clicado!'),
         () => alert('Daily clicado!')
       ];
@@ -93,6 +96,7 @@ export default class Renderer {
   
       // Draw UI
       this.drawUI(gameManager.player.money, viewportWidth);
+      this.upgradeWindow.draw(this.ctx);
     }
   
     drawUI(money, viewportWidth) {
@@ -114,6 +118,8 @@ export default class Renderer {
     }
   
     checkButtonClick(clickX, clickY) {
+      let clickedOnButton = false;
+    
       this.buttons.forEach(btn => {
         if (
           clickX >= btn.x &&
@@ -122,7 +128,12 @@ export default class Renderer {
           clickY <= btn.y + btn.size
         ) {
           btn.action();
+          clickedOnButton = true;
         }
       });
+    
+      if (!clickedOnButton) {
+        this.upgradeWindow.handleClick(clickX, clickY);
+      }
     }
   }
