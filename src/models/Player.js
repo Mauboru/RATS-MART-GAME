@@ -11,6 +11,9 @@ export default class Player extends Entidade {
     this.items = [];
     this.maxItems = 3;
 
+    this.frameCount = 2;
+    this.frameDelay = 8;
+
     this.collisionRegion = { 
       x: 15, 
       y: this.height + 20, 

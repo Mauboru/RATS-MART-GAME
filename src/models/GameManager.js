@@ -254,14 +254,14 @@ export default class GameManager {
   loadGameData(loadedData) {
     const initialX = loadedData?.playerX ?? 100;
     const initialY = loadedData?.playerY ?? 100;
-    const initialMoney = loadedData?.money ?? 200;
+    const initialMoney = loadedData?.money ?? 100;
     const initialMaxItems = loadedData?.maxItems ?? 3;
 
-    this.player = new Player(initialX, initialY, 3, this.assets.playerImg, 32, 32);
+    this.player = new Player(initialX, initialY, 3, this.assets.playerImg, 295, 620);
     this.player.money = initialMoney;
     this.player.maxItems = initialMaxItems;
     this.player.drawWidth = 64;
-    this.player.drawHeight = 64;
+    this.player.drawHeight = 128;
 
     this.paymentBox = new PaymentBox(25, 350, 128, 64, this.assets.moneyImg, this.assets.paymentBoxImage);
     if (loadedData?.paymentBox?.money) {
@@ -356,7 +356,7 @@ export default class GameManager {
     }));
     
     save(
-      'game1',
+      'game',
       this.player.money,
       this.player.x,
       this.player.y,

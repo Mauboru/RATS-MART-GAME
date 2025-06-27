@@ -7,7 +7,7 @@ export default class UpgradeWindow {
         this.width = width;
         this.height = height;
         this.visible = false;
-        this.upgradeCost = 50;
+        this.upgradeCost = 120;
         this.padding = 15;
         this.buttonHeight = 40;
     }

@@ -81,7 +81,7 @@ export function GameCanvas({ assetPaths }) {
     });
 
     const canvas = canvasRef.current;
-    const loadedData = load('game1');
+    const loadedData = load('game');
     
     const now = performance.now();
     const deltaTime = now - lastTime;
