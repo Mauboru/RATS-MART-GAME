@@ -1,5 +1,5 @@
 export default class Item {
-  constructor(x, y, width, height, sprite, type) {
+  constructor(x, y, width, height, sprite, type = 'apple') {
     this.x = x;
     this.y = y;
     this.width = width;

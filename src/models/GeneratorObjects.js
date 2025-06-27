@@ -1,7 +1,7 @@
 import { Item } from '.';
 
 export default class GeneratorObject {
-  constructor(x, y, width, height, sprite, itemSprite, itemCooldown = 300, maxItems = 3) {
+  constructor(x, y, width, height, sprite, itemSprite, itemCooldown = 300, maxItems = 3, type='apple') {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -13,6 +13,7 @@ export default class GeneratorObject {
     this.cooldown = itemCooldown;
     this.timer = 0;
     this.maxItems = maxItems;
+    this.type = type;
 
     this.offsets = [
       { x: 0, y: 0 },

@@ -4,9 +4,10 @@ export default function App() {
   const assetPaths = {
     backgroundImg: './background.png',
     playerImg: './player.png',
-    boxImg: './box.png',
     generatorImg: './generator.png',
     itemImg: './item.png',
+    arvoreBananaImg: './arvoreBanana.png',
+    bananaImg: './banana.png',
     spotImage: './spot.png',
     paymentBoxImage: './paymentBox.png',
     moneyImg: './money.png',
@@ -18,6 +19,9 @@ export default function App() {
     upgradeButtonIcon: './upgrade.png',
     dailyButtonIcon: './daily.png',
     garbageImg: './garbage.png',
+
+    boxImg: './box.png',
+    bananaBoxImg: './boxBanana.png',
 
     // NOVOS SONS:
     backgroundMusic: './sounds/music.mp3',

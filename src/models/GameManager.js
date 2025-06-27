@@ -22,9 +22,9 @@ export default class GameManager {
     this.unlockedSpotGroups = 0;
 
     this.spotGroupsToUnlock = [
-      [1, 3],
-      [5, 0],
-      [2, 4, 6]
+      [0, 1],
+      [2],
+      [3]
     ];
   }
 
@@ -293,13 +293,10 @@ export default class GameManager {
     }
     
     return [
-      new ConstructionSpot(200, 200, 64, 64, 100, this.assets.spotImage, 1, false),
-      new ConstructionSpot(300, 200, 64, 64, 50, this.assets.spotImage, 1, false),
-      new ConstructionSpot(200, 420, 64, 64, 100, this.assets.spotImage, 2, false),
-      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 2, false),
-      new ConstructionSpot(400, 420, 64, 64, 250, this.assets.spotImage, 2, false),
-      new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false),
-      new ConstructionSpot(55, 520, 64, 64, 150, this.assets.spotImage, 4, false),
+      new ConstructionSpot(300, 200, 64, 64, 50, this.assets.spotImage, 1, false), // macieira
+      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 2, false), // caixa de maças
+      new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false), // caixa
+      new ConstructionSpot(55, 520, 64, 64, 250, this.assets.spotImage, 4, false), // estoquista
     ];
   }
 
@@ -356,7 +353,7 @@ export default class GameManager {
     }));
     
     save(
-      'game',
+      'GameSave01',
       this.player.money,
       this.player.x,
       this.player.y,
