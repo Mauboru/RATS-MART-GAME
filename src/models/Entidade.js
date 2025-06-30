@@ -78,13 +78,21 @@ export default class Entidade {
   
       ctx.restore();
   
-      const itemSize = 16;
+      const itemSize = 32;
+      let offsetX = 0;
+      
+      if (this.state === 'idle') {
+        offsetX = this.facing === 'right' ? -8 : -12;
+      } else if (this.state === 'walking') {
+        offsetX = this.facing === 'right' ? 0 : -20;
+      }
+      
       for (let i = 0; i < this.items.length; i++) {
         const item = this.items[i];
         if (item && item.sprite instanceof HTMLImageElement) {
-          const itemX = drawX + this.drawWidth / 2 - itemSize / 2;
-          const itemY = drawY - (i + 1) * (itemSize + 2);
-          ctx.drawImage(item.sprite, itemX, itemY, itemSize, itemSize);
+          const itemX = drawX + this.drawWidth / 2 - itemSize / 2 + offsetX;
+          const itemY = drawY - (i + 1) * (itemSize - 20);
+          ctx.drawImage(item.sprite, itemX, itemY, 48, 32);
         }
       }
     }

@@ -5,7 +5,7 @@ export default function App() {
     backgroundImg: './background.png',
     playerImg: './player.png',
     generatorImg: './generator.png',
-    itemImg: './item.png',
+    itemImg: './queijo.png',
     arvoreBananaImg: './arvoreBanana.png',
     bananaImg: './banana.png',
     spotImage: './spot.png',

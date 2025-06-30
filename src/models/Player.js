@@ -11,7 +11,7 @@ export default class Player extends Entidade {
     this.items = [];
     this.maxItems = 3;
 
-    this.frameCount = 2;
+    this.frameCount = 3;
     this.frameDelay = 8;
 
     this.collisionRegion = { 
@@ -60,7 +60,16 @@ export default class Player extends Entidade {
   }
 
   draw(ctx, cameraX, cameraY) {
-    const row = this.state === 'idle' ? 0 : 1;
+    let row = 1;
+  
+    if (this.items.length > 0) {
+      if (this.state === 'idle') row = 3;
+      else row = 2;
+    } else {
+      if (this.state === 'idle') row = 1;
+      else row = 0;
+    }
+  
     super.draw(ctx, cameraX, cameraY, row, this.items);
   }
 }

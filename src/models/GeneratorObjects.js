@@ -53,7 +53,7 @@ export default class GeneratorObject {
       const newItem = new Item(
         this.x + this.width / 2 + offset.x,
         this.y + this.height / 2 + offset.y,
-        16, 16,
+        48, 32,
         this.itemSprite
       );
       newItem.slotIndex = slotIndex;
