@@ -3,7 +3,7 @@ import { GameCanvas } from './components/GameCanvas';
 export default function App() {
   const assetPaths = {
     backgroundImg: './background.png',
-    playerImg: './player.png',
+    playerImg01: './player.png',
     generatorImg: './generator.png',
     itemImg: './queijo.png',
     arvoreBananaImg: './arvoreBanana.png',

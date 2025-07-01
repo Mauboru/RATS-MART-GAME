@@ -257,7 +257,7 @@ export default class GameManager {
     const initialMoney = loadedData?.money ?? 100;
     const initialMaxItems = loadedData?.maxItems ?? 3;
 
-    this.player = new Player(initialX, initialY, 3, this.assets.playerImg, 305, 445);
+    this.player = new Player(initialX, initialY, 3, this.assets.playerImg01 , 305, 445);
     this.player.money = initialMoney;
     this.player.maxItems = initialMaxItems;
     this.player.drawWidth = 64;
