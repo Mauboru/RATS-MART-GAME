@@ -29,7 +29,8 @@ export function useAssets(assetPaths) {
           loadedCount++;
           checkCompletion();
         };
-        img.onerror = () => {
+        img.onerror = (e) => {
+          console.error(`Erro ao carregar imagem "${key}" (${path})`, e);
           errorFound = true;
           loadedCount++;
           checkCompletion();
@@ -42,7 +43,8 @@ export function useAssets(assetPaths) {
           loadedCount++;
           checkCompletion();
         };
-        audio.onerror = () => {
+        audio.onerror = (e) => {
+          console.error(`Erro ao carregar áudio "${key}" (${path})`, e);
           errorFound = true;
           loadedCount++;
           checkCompletion();

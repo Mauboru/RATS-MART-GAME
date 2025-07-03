@@ -10,30 +10,31 @@ export default function App() {
     bananaImg: './banana.png',
     spotImage: './spot.png',
     paymentBoxImage: './paymentBox.png',
-    moneyImg: './money.png',
+    moneyImg: './sprites/UI/coin.png',
     clientImg: './client.png',
     cashierImg: './cashier.png',
     stockerImg: './stocker.png',
-    configButtonIcon: './engrenagem.png',
-    hatButtonIcon: './hat.png',
-    upgradeButtonIcon: './upgrade.png',
-    dailyButtonIcon: './daily.png',
     garbageImg: './garbage.png',
 
     boxImg: './box.png',
     bananaBoxImg: './boxBanana.png',
 
     juiceMachineImg: './paymentBox.png',
-    sucoImg: './hat.png',
+    sucoImg: './sprites/UI/hats.png',
 
     // NOVOS SONS:
     backgroundMusic: './sounds/music.mp3',
     //pickupSound: './sounds/pickup.wav',
 
-    // ... outros assets
     upgradeIcon: './upgrade-icon.png',
-    bagIcon: './bag-icon.png',        
-    moneyIcon: './money-icon.png',
+    bagIcon: './bag-icon.png',
+
+    // HUD ICONS OPTIONS
+    upgradeButtonIcon: './sprites/UI/upgrade.png',
+    configButtonIcon: './sprites/UI/tool.png',
+    hatButtonIcon: './sprites/UI/hats.png',
+    moneyIcon: './sprites/UI/coin.png',
+    dailyButtonIcon: './sprites/UI/daily.png',
   };
 
   return <GameCanvas assetPaths={assetPaths} />;

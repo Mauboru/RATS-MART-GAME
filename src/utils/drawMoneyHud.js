@@ -1,8 +1,8 @@
 const dollarIcon = new Image();
-dollarIcon.src = '/dollar.png';
+dollarIcon.src = '/sprites/UI/coin.png';
 
 const gemIcon = new Image();
-gemIcon.src = '/gem.png';
+gemIcon.src = '/sprites/UI/gem.png';
 
 export function drawMoneyHud(ctx, money, gems, canvasWidth) {
   const padding = 30;
