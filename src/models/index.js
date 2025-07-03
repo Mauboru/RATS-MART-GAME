@@ -11,3 +11,4 @@ export { default as Renderer } from './Renderer';
 export { default as GameManager } from './GameManager';
 export { default as Garbage } from './Garbage';
 export { default as Cashier } from './Cashier';
+export { default as ProcessingGenerator } from './ProcessingGenerator';

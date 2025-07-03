@@ -22,7 +22,7 @@ export default class Box {
   }
 
   addItem(item) {
-    if (!this.isFull()) {
+    if (!this.isFull() && item.type === this.type) {
       this.items.push(item);
     }
   }
@@ -57,6 +57,14 @@ export default class Box {
     const itemSize = 16;
     const padding = 4;
     const cols = Math.floor(this.width / (itemSize + padding));
+
+    // Texto 
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`$${this.type}`,
+    this.x + this.width / 2 - cameraX,
+    this.y + this.height + 25 - cameraY);
     
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];

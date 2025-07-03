@@ -81,7 +81,7 @@ export function GameCanvas({ assetPaths }) {
     });
 
     const canvas = canvasRef.current;
-    const loadedData = load('GameSave02');
+    const loadedData = load('GameSave022');
     localStorage.clear(); // remover isso depois
 
     const now = performance.now();
@@ -136,12 +136,31 @@ export function GameCanvas({ assetPaths }) {
         });
       });
 
+      // Atualiza geradores de suco
+    //   gameManager.processingGenerators.forEach(processingGenerator => {
+    //     // Verifica colisão com o jogador
+    //     if (processingGenerator.checkCollision(player) && player.getItem() > 0) {
+    //         const lastItem = player.items[player.items.length - 1];
+    //         if (processingGenerator.tryInsertItem(lastItem)) player.items.pop(); 
+  
+    //         if (processingGenerator.outputItems.length > 0 && player.items.length < player.maxItems) {
+    //             const outputItem = processingGenerator.takeOutputItem();
+    //             if (outputItem) player.addItem(outputItem);
+    //         }
+    //     }
+        
+    //     // Atualiza o gerador
+    //     processingGenerator.update();
+    // });
+
       // Atualiza caixas
       gameManager.boxes.forEach(box => {
         if (box.checkCollision(player) && player.items.length > 0 && box.items.length < 9) {
           const now = performance.now();
-          if (now - lastTransferTimeRef.current > transferDelay) {
-            const item = player.items.pop();
+          const lastItem = player.items[player.items.length - 1];
+      
+          if (lastItem.type === box.type && now - lastTransferTimeRef.current > transferDelay) {
+            const item = player.items.pop(); // agora sim remove
             box.addItem(item);
             lastTransferTimeRef.current = now;
           }

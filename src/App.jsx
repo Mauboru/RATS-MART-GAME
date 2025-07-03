@@ -23,6 +23,9 @@ export default function App() {
     boxImg: './box.png',
     bananaBoxImg: './boxBanana.png',
 
+    juiceMachineImg: './paymentBox.png',
+    sucoImg: './hat.png',
+
     // NOVOS SONS:
     backgroundMusic: './sounds/music.mp3',
     //pickupSound: './sounds/pickup.wav',

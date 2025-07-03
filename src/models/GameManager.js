@@ -1,4 +1,4 @@
-import { Player, Box, ConstructionSpot, PaymentBox, Client, GeneratorObject, Stocker, Garbage, Cashier, Money} from '../models';
+import { Player, Box, ConstructionSpot, ProcessingGenerator, PaymentBox, Client, GeneratorObject, Stocker, Garbage, Cashier, Money} from '../models';
 import { save } from '../utils/saveGame';
 
 export default class GameManager {
@@ -9,6 +9,7 @@ export default class GameManager {
     this.garbage = null;
     this.clients = [];
     this.generators = [];
+    this.processingGenerators = [];
     this.boxes = [];
     this.stockers = [];
     this.cashier = null;
@@ -22,9 +23,10 @@ export default class GameManager {
     this.unlockedSpotGroups = 0;
 
     this.spotGroupsToUnlock = [
-      [0, 1],
-      [2],
-      [3]
+      [1, 3],
+      [0, 2],
+      [4],
+      [5]
     ];
   }
 
@@ -188,15 +190,45 @@ export default class GameManager {
         this.generators.push(new GeneratorObject(
           spot.x, spot.y, 
           spot.width, spot.height, 
-          this.assets.generatorImg, 
-          this.assets.itemImg, 
-          200
+          this.assets.arvoreBananaImg, 
+          this.assets.bananaImg, 
+          200, 
+          3,          
+          'banana' 
         ));
         break;
+      
+      case 6: // Generator
+        this.generators.push(new GeneratorObject(
+          spot.x, spot.y, 
+          spot.width, spot.height, 
+          this.assets.generatorImg, 
+          this.assets.itemImg, 
+          200, 
+          3,          
+          'maca' 
+        ));
+        break;
+      
+      // case 7: // ProcessingGenerator (Maçã → Suco)
+      // this.processingGenerators.push(new ProcessingGenerator(
+      //     spot.x, spot.y, spot.width, spot.height,
+      //     this.assets.juiceMachineImg,
+      //     'maca',             // input
+      //     'suco',             // output
+      //     3,                  // precisa de 3 maçãs
+      //     this.assets.sucoImg // sprite do suco
+      //   ));
+      //   break;
         
       case 2: // Box
-        const newBox = new Box(spot.x, spot.y + 100, spot.width, spot.height, this.assets.boxImg);
-        this.boxes.push(newBox);
+        const boxBanana = new Box(spot.x, spot.y + 100, spot.width, spot.height, this.assets.bananaBoxImg, 'banana');
+        this.boxes.push(boxBanana);
+        break;
+      
+      case 5: // Box
+        const boxMaca = new Box(spot.x, spot.y + 100, spot.width, spot.height, this.assets.boxImg, 'maca');
+        this.boxes.push(boxMaca);
         break;
         
       case 3: // Cashier
@@ -293,8 +325,11 @@ export default class GameManager {
     }
     
     return [
-      new ConstructionSpot(300, 200, 64, 64, 50, this.assets.spotImage, 1, false), // macieira
-      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 2, false), // caixa de maças
+      new ConstructionSpot(300, 200, 64, 64, 50, this.assets.spotImage, 1, false), // bananeira
+      new ConstructionSpot(220, 200, 64, 64, 50, this.assets.spotImage, 6, false), // macieira
+      new ConstructionSpot(220, 420, 64, 64, 50, this.assets.spotImage, 2, false), // caixa de banana
+      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 5, false), // caixa de maças
+      // new ConstructionSpot(220, 320, 64, 64, 5, this.assets.spotImage, 7, false), // gerador de sucos
       new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false), // caixa
       new ConstructionSpot(55, 520, 64, 64, 250, this.assets.spotImage, 4, false), // estoquista
     ];

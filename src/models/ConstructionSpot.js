@@ -73,8 +73,8 @@ export default class ConstructionSpot {
       ctx.font = '16px Arial';
       ctx.textAlign = 'center';
       ctx.fillText(`$${this.cost}`,
-        this.x + this.width / 2 - cameraX,
-        this.y + this.height + 25 - cameraY);
+      this.x + this.width / 2 - cameraX,
+      this.y + this.height + 25 - cameraY);
     
       // Barra de progresso (opcional)
       const progressWidth = 50;

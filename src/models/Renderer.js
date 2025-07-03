@@ -78,6 +78,7 @@ export default class Renderer {
         ...gameManager.generators,
         ...gameManager.clients,
         ...gameManager.stockers,
+        ...gameManager.processingGenerators,
         gameManager.garbage,
         gameManager.player,
         gameManager.paymentBox,
