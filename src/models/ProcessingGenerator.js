@@ -8,76 +8,139 @@ export default class ProcessingGenerator {
     this.height = height;
     this.sprite = sprite;
 
-    this.inputType = inputType;       // ex: 'maca'
-    this.outputType = outputType;     // ex: 'suco'
-    this.inputNeeded = inputNeeded;   // ex: 3 maçãs para gerar 1 suco
+    this.inputType = inputType;
+    this.outputType = outputType;
+    this.inputNeeded = inputNeeded;
     this.outputSprite = outputSprite;
 
-    this.storedItems = 0;
+    this.inputItems = []; 
     this.outputItems = [];
-    this.offsets = [{ x: 0, y: 0 }, { x: -15, y: -10 }, { x: 10, y: -15 }];
+
+    this.processingTime = 200;
+    this.currentProcessingTime = 0;
+
+    this.isBroken = false;
+    this.breakTimer = 0;
+    this.maxBreakTime = 3000;
+
+    this.inputOffsets = [
+      { x: -25, y: 0 },
+      { x: -5, y: 0 },
+      { x: -25, y: 20 },
+      { x: -5, y: 20 },
+    ];
+    this.outputOffsets = [
+      { x: 25, y: 0 },
+      { x: 45, y: 0 },
+      { x: 25, y: 20 },
+      { x: 45, y: 20 },
+    ];
   }
 
   update() {
-    // Verifica se tem itens suficientes para gerar
-    if (this.storedItems >= this.inputNeeded) {
-      const slotIndex = this.outputItems.length;
-      if (slotIndex >= this.offsets.length) return;
+    if (this.isBroken) return;
 
-      const offset = this.offsets[slotIndex];
+    if (this.outputItems.length >= 4) return;
 
-      const item = new Item(
-        this.x + this.width / 2 + offset.x,
-        this.y + this.height / 2 + offset.y,
-        48, 32,
-        this.outputSprite,
-        this.outputType
-      );
+    if (this.inputItems.length > 0) {
+      this.currentProcessingTime++;
 
-      item.slotIndex = slotIndex;
-      this.outputItems.push(item);
-      this.storedItems -= this.inputNeeded;
+      if (this.currentProcessingTime >= this.processingTime && this.inputItems.length > 0) {
+        this.inputItems.shift();
+        this.currentProcessingTime = 0;
+        this.processedItemCount = (this.processedItemCount || 0) + 1;
+      
+        if (this.processedItemCount > 0) {
+          const offset = this.outputOffsets[this.outputItems.length];
+          const item = new Item(
+            this.x + this.width / 2 + offset.x,
+            this.y + this.height / 2 + offset.y,
+            20, 27,
+            this.outputSprite,
+            this.outputType
+          );
+          item.slotIndex = this.outputItems.length;
+      
+          this.outputItems.push(item);
+          this.processedItemCount = 0;
+        }
+      }
+    } else {
+      this.currentProcessingTime = 0;
+    }
+
+    this.breakTimer++;
+    if (this.breakTimer >= this.maxBreakTime) {
+      this.isBroken = true;
     }
   }
 
   tryInsertItem(item) {
-    if (item.type === this.inputType && this.outputItems.length < this.offsets.length) {
-      this.storedItems++;
-      return true; // item consumido
+    if (this.isBroken) return false;
+    if (item.type === this.inputType && this.inputItems.length < 4) {
+      this.inputItems.push(item);
+      return true;
     }
-    return false; // rejeitado
-  }
-
-  getBaseY() {
-    return this.y + this.height;
+    return false;
   }
 
   takeOutputItem() {
     return this.outputItems.shift();
   }
 
+  repair() {
+    this.isBroken = false;
+    this.breakTimer = 0;
+  }
+
   checkCollision(entity) {
     return (
-      this.x < entity.x + entity.width &&
-      this.x + this.width > entity.x &&
-      this.y < entity.y + entity.height &&
-      this.y + this.height > entity.y
+      entity.x < this.x + this.width &&
+      entity.x + entity.drawWidth > this.x &&
+      entity.y < this.y + this.height &&
+      entity.y + entity.drawHeight > this.y
     );
+  }
+
+  getBaseY() {
+    return this.y + this.height;
   }
 
   draw(ctx, cameraX, cameraY) {
     ctx.drawImage(this.sprite, this.x - cameraX, this.y - cameraY, this.width, this.height);
 
-    // Texto com progresso
-    ctx.fillStyle = 'white';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(
-      `${this.storedItems}/${this.inputNeeded} ${this.inputType}`,
-      this.x + this.width / 2 - cameraX,
-      this.y + this.height + 16 - cameraY
-    );
+    if (this.inputItems.length > 0 && !this.isBroken && this.outputItems.length < 4) {
+      const progressRatio = this.currentProcessingTime / this.processingTime;
+      ctx.fillStyle = 'lime';
+      ctx.fillRect(
+        this.x - cameraX,
+        this.y - 10 - cameraY,
+        this.width * progressRatio,
+        5
+      );
+    }
 
-    this.outputItems.forEach(item => item.draw(ctx, cameraX, cameraY));
+    if (this.isBroken) {
+      ctx.fillStyle = 'red';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('QUEBRADO', this.x + this.width / 2 - cameraX, this.y - 15 - cameraY);
+    }
+
+    // desenha itens de entrada
+    this.inputItems.forEach((item, index) => {
+      const offset = this.inputOffsets[index];
+      item.x = this.x + this.width / 2 + offset.x - 50;
+      item.y = this.y + this.height / 2 + offset.y - 30;
+      item.draw(ctx, cameraX, cameraY);
+    });
+
+    // desenha itens de saída
+    this.outputItems.forEach((item, index) => {
+      const offset = this.outputOffsets[index];
+      item.x = this.x + this.width / 2 + offset.x - 10;
+      item.y = this.y + this.height / 2 + offset.y - 30;
+      item.draw(ctx, cameraX, cameraY);
+    });
   }
 }

@@ -82,7 +82,7 @@ export function GameCanvas({ assetPaths }) {
 
     const canvas = canvasRef.current;
     const loadedData = load('GameSave02');
-    localStorage.clear(); // remover isso depois
+    //localStorage.clear(); // remover isso depois
 
     const now = performance.now();
     const deltaTime = now - lastTime;
@@ -137,21 +137,34 @@ export function GameCanvas({ assetPaths }) {
       });
 
       // Atualiza geradores de suco
-    //   gameManager.processingGenerators.forEach(processingGenerator => {
-    //     // Verifica colisão com o jogador
-    //     if (processingGenerator.checkCollision(player) && player.getItem() > 0) {
-    //         const lastItem = player.items[player.items.length - 1];
-    //         if (processingGenerator.tryInsertItem(lastItem)) player.items.pop(); 
-  
-    //         if (processingGenerator.outputItems.length > 0 && player.items.length < player.maxItems) {
-    //             const outputItem = processingGenerator.takeOutputItem();
-    //             if (outputItem) player.addItem(outputItem);
-    //         }
-    //     }
-        
-    //     // Atualiza o gerador
-    //     processingGenerator.update();
-    // });
+      gameManager.processingGenerators.forEach(processingGenerator => {
+        if (processingGenerator.checkCollision(player)) {
+          if (processingGenerator.isBroken) {
+            processingGenerator.repair();
+          }
+      
+          const playerCenterX = player.x + player.drawWidth / 2;
+          const generatorCenterX = processingGenerator.x + processingGenerator.width / 2;
+      
+          const isLeftSide = playerCenterX < generatorCenterX;
+          const isRightSide = playerCenterX >= generatorCenterX;
+      
+          // Entrega item (lado esquerdo)
+          if (isLeftSide && player.getItem() > 0) {
+            const lastItem = player.items[player.items.length - 1];
+            if (processingGenerator.tryInsertItem(lastItem)) {
+              player.items.pop();
+            }
+          }
+      
+          // Coleta saída (lado direito)
+          if (isRightSide && processingGenerator.outputItems.length > 0 && player.items.length < player.maxItems) {
+            const outputItem = processingGenerator.takeOutputItem();
+            if (outputItem) player.addItem(outputItem);
+          }
+        }
+        processingGenerator.update();
+      });
 
       // Atualiza caixas
       gameManager.boxes.forEach(box => {
@@ -160,7 +173,7 @@ export function GameCanvas({ assetPaths }) {
           const lastItem = player.items[player.items.length - 1];
       
           if (lastItem.type === box.type && now - lastTransferTimeRef.current > transferDelay) {
-            const item = player.items.pop(); // agora sim remove
+            const item = player.items.pop();
             box.addItem(item);
             lastTransferTimeRef.current = now;
           }

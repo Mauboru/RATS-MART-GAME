@@ -16,8 +16,8 @@ export default class Player extends Entidade {
 
     this.collisionRegion = { 
       x: 15, 
-      y: this.height + 20, 
-      width: this.width, 
+      y: this.y - 5, 
+      width: 42, 
       height: 10 
     };
   }
@@ -61,7 +61,7 @@ export default class Player extends Entidade {
 
   draw(ctx, cameraX, cameraY) {
     let row = 1;
-  
+
     if (this.items.length > 0) {
       if (this.state === 'idle') row = 3;
       else row = 2;
@@ -69,7 +69,21 @@ export default class Player extends Entidade {
       if (this.state === 'idle') row = 1;
       else row = 0;
     }
-  
+
     super.draw(ctx, cameraX, cameraY, row, this.items);
+
+    // 🟥 Desenha a caixa de colisão (debug)
+    // const col = this.collisionRegion;
+    // ctx.save();
+    // ctx.strokeStyle = 'red';
+    // ctx.lineWidth = 1;
+    // ctx.strokeRect(
+    //   this.x + col.x - cameraX,
+    //   this.y + col.y - cameraY,
+    //   col.width,
+    //   col.height
+    // );
+    ctx.restore();
   }
+
 }
