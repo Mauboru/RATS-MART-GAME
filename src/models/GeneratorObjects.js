@@ -69,13 +69,13 @@
       const drawX = this.x - cameraX;
       const drawY = this.y - cameraY;
 
-      // Texto 
-      ctx.fillStyle = 'white';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`$${this.type}`,
-      this.x + this.width / 2 - cameraX,
-      this.y + this.height + 25 - cameraY);
+      // tipo 
+      // ctx.fillStyle = 'white';
+      // ctx.font = '16px Arial';
+      // ctx.textAlign = 'center';
+      // ctx.fillText(`$${this.type}`,
+      // this.x + this.width / 2 - cameraX,
+      // this.y + this.height + 25 - cameraY);
 
       ctx.drawImage(this.sprite, drawX, drawY, this.width, this.height);
 

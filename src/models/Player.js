@@ -86,5 +86,4 @@ export default class Player extends Entidade {
     
     ctx.restore();
   }
-
 }
