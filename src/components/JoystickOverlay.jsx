@@ -13,6 +13,7 @@ export function JoystickOverlay({ active, basePos, stickPos, radius }) {
     backgroundColor: 'rgba(0,0,0,0.3)',
     border: '2px solid #333',
     pointerEvents: 'none',
+    userSelect: 'none',
     zIndex: 999,
   };
 
