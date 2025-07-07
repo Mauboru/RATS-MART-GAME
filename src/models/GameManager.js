@@ -22,12 +22,13 @@ export default class GameManager {
     this.unlockedSpotGroups = 0;
 
     this.spotGroupsToUnlock = [
-      [1, 3],
-      [2],
-      [0],
-      [4],
-      [5],
-      [7, 6]
+      // [1, 3],
+      // [2],
+      // [0],
+      // [4],
+      // [5],
+      // [7, 6]
+      [0, 1, 2, 3, 4, 5, 6, 7]
     ];
   }
 
@@ -213,7 +214,7 @@ export default class GameManager {
       
       case 7: // ProcessingGenerator (Maçã → Suco)
       this.processingGenerators.push(new ProcessingGenerator(
-          spot.x, spot.y, 128, 64,
+          spot.x, spot.y + 100, 128, 64,
           this.assets.juiceMachineImg,
           'maca',             // input
           'suco',             // output
@@ -331,14 +332,23 @@ export default class GameManager {
     }
     
     return [
-      new ConstructionSpot(300, 200, 64, 64, 100, this.assets.spotImage, 1, false), // bananeira
-      new ConstructionSpot(220, 200, 64, 64, 50, this.assets.spotImage, 6, false), // macieira
-      new ConstructionSpot(220, 420, 64, 64, 100, this.assets.spotImage, 2, false), // caixa de banana
-      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 5, false), // caixa de maças
-      new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false), // caixa
-      new ConstructionSpot(55, 220, 64, 64, 250, this.assets.spotImage, 4, false), // estoquista
-      new ConstructionSpot(220, 720, 64, 64, 300, this.assets.spotImage, 7, false), // gerador de sucos
-      new ConstructionSpot(420, 620, 64, 64, 350, this.assets.spotImage, 8, false), // caixa de sucos
+      // new ConstructionSpot(300, 200, 64, 64, 100, this.assets.spotImage, 1, false), // bananeira
+      // new ConstructionSpot(220, 200, 64, 64, 50, this.assets.spotImage, 6, false), // macieira
+      // new ConstructionSpot(220, 420, 64, 64, 100, this.assets.spotImage, 2, false), // caixa de banana
+      // new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 5, false), // caixa de maças
+      // new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false), // caixa
+      // new ConstructionSpot(55, 220, 64, 64, 250, this.assets.spotImage, 4, false), // estoquista
+      // new ConstructionSpot(220, 720, 64, 64, 300, this.assets.spotImage, 7, false), // gerador de sucos
+      // new ConstructionSpot(420, 620, 64, 64, 350, this.assets.spotImage, 8, false), // caixa de sucos
+
+      new ConstructionSpot(300, 200, 64, 64, 1, this.assets.spotImage, 1, false), // bananeira
+      new ConstructionSpot(220, 200, 64, 64, 5, this.assets.spotImage, 6, false), // macieira
+      new ConstructionSpot(220, 420, 64, 64, 1, this.assets.spotImage, 2, false), // caixa de banana
+      new ConstructionSpot(300, 420, 64, 64, 5, this.assets.spotImage, 5, false), // caixa de maças
+      new ConstructionSpot(55, 420, 64, 64, 2, this.assets.spotImage, 3, false), // caixa
+      new ConstructionSpot(55, 220, 64, 64, 2, this.assets.spotImage, 4, false), // estoquista
+      new ConstructionSpot(220, 720, 64, 64, 3, this.assets.spotImage, 7, false), // gerador de sucos
+      new ConstructionSpot(420, 620, 64, 64, 3, this.assets.spotImage, 8, false), // caixa de sucos
     ];
   }
 

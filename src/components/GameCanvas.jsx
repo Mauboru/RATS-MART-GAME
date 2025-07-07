@@ -81,7 +81,7 @@ export function GameCanvas({ assetPaths }) {
     });
 
     const canvas = canvasRef.current;
-    const loadedData = load('GameSave02');
+    const loadedData = load('GameSave02Teste');
     //localStorage.clear(); // remover isso depois
 
     const now = performance.now();
@@ -119,7 +119,8 @@ export function GameCanvas({ assetPaths }) {
 
       // Atualiza o jogador
       if (activeRef.current) {
-        player.update(directionRef.current, [...gameManager.boxes, gameManager.paymentBox]);
+        const collisionObjects = [...gameManager.boxes, gameManager.paymentBox, ...gameManager.processingGenerators];
+        player.update(directionRef.current, collisionObjects);
       } else {
         player.update({ x: 0, y: 0 }, []);
       }

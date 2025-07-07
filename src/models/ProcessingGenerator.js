@@ -35,6 +35,13 @@ export default class ProcessingGenerator {
       { x: 25, y: 20 },
       { x: 45, y: 20 },
     ];
+
+    this.collisionRegion = { 
+      x: 0, 
+      y: this.height - 30, 
+      width: this.width, 
+      height: 30 
+    };
   }
 
   update() {
@@ -119,6 +126,17 @@ export default class ProcessingGenerator {
         5
       );
     }
+
+    const col = this.collisionRegion;
+    ctx.save();
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(
+      this.x + col.x - cameraX,
+      this.y + col.y - cameraY,
+      col.width,
+      col.height
+    );
 
     if (this.isBroken) {
       ctx.fillStyle = 'red';

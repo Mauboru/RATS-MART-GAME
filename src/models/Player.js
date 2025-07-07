@@ -83,6 +83,7 @@ export default class Player extends Entidade {
     //   col.width,
     //   col.height
     // );
+    
     ctx.restore();
   }
 

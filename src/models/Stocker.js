@@ -141,18 +141,23 @@ export default class Stocker extends Entidade {
     }
 
     chooseGenerator(generators) {
-        this.generatorTarget = generators[Math.floor(Math.random() * generators.length)];
+        if (generators.length === 0) {
+          this.state = 'waiting';
+          return;
+        }
+        
+        this.generatorTarget = generators.find(g => g.hasItem()) || generators[0];
         this.state = 'movingToGenerator';
     }
-
+      
     chooseBox(boxes) {
-        const box = boxes.find(b => !b.isFull());
-        if (box) {
-            this.boxTarget = box;
-            this.state = 'movingToBox';
-        } else {
-            this.state = 'movingToGarbage';
-        }
+    const box = boxes.find(b => !b.isFull());
+    if (box) {
+        this.boxTarget = box;
+        this.state = 'movingToBox';
+    } else {
+        this.state = 'movingToGarbage';
+    }
     }
 
     hasAvailableBox(boxes) {
@@ -164,17 +169,23 @@ export default class Stocker extends Entidade {
     }
 
     moveTo(target) {
+        if (!target) {
+          this.state = 'waiting'; // Volta para estado seguro
+          return;
+        }
+      
         const dx = target.x - this.x;
         const dy = target.y - this.y;
         const distance = Math.hypot(dx, dy);
+        
         if (distance > 1) {
-            this.direction = { x: dx / distance, y: dy / distance };
-            this.x += this.direction.x * this.speed;
-            this.y += this.direction.y * this.speed;
+          this.direction = { x: dx / distance, y: dy / distance };
+          this.x += this.direction.x * this.speed;
+          this.y += this.direction.y * this.speed;
         } else {
-            this.direction = { x: 0, y: 0 };
+          this.direction = { x: 0, y: 0 };
         }
-    }
+      }
 
     isAtTarget(target, buffer = 10) {
         return Math.hypot(target.x - this.x, target.y - this.y) < buffer;
