@@ -58,13 +58,25 @@ export default class Box {
     const padding = 4;
     const cols = Math.floor(this.width / (itemSize + padding));
 
-    // Tipo 
+    // Tipo
     // ctx.fillStyle = 'white';
     // ctx.font = '16px Arial';
     // ctx.textAlign = 'center';
     // ctx.fillText(`$${this.type}`,
     // this.x + this.width / 2 - cameraX,
     // this.y + this.height + 25 - cameraY);
+    
+    // 🟥 Desenha a caixa de colisão (debug)
+    // const col = this.collisionRegion;
+    // ctx.save();
+    // ctx.strokeStyle = 'red';
+    // ctx.lineWidth = 1;
+    // ctx.strokeRect(
+    //   this.x + col.x - cameraX,
+    //   this.y + col.y - cameraY,
+    //   col.width,
+    //   col.height
+    // );
     
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];

@@ -84,5 +84,19 @@ export default class Client extends Entidade {
   draw(ctx, cameraX, cameraY) {
     const row = this.state === 'waiting' ? 0 : 1;
     super.draw(ctx, cameraX, cameraY, row);
+  
+    // Desenha a quantidade e tipo do item que o cliente quer
+    const text = `${this.requiredItems}x ${this.targetBox.type}`;
+    ctx.font = '14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+  
+    const textX = this.x - cameraX + this.drawWidth / 2;
+    const textY = this.y - cameraY + this.drawHeight + 10;
+  
+    ctx.strokeText(text, textX, textY);
+    ctx.fillText(text, textX, textY);
   }
+  
 }

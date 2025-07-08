@@ -32,6 +32,7 @@ export default class GameManager {
     ];
   }
 
+  // UPDATES
   update() {
     this.updateBoxes();
     this.updateClients();
@@ -92,26 +93,24 @@ export default class GameManager {
       });
     };
   
-    // if (groupByState.waiting.length > 0) {
-    //   groupByState.waiting.forEach(c => c.waitPos = null); // limpa a posição
-    //   positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
-    // }
+    if (groupByState.waiting.length > 0) {
+      groupByState.waiting.forEach(c => c.waitPos = null); // limpa a posição
+      positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
+    }
     
-    // if (groupByState.waitingForPlayer.length > 0) {
-    //   groupByState.waitingForPlayer.forEach(c => c.waitPos = null); // limpa a posição
-    //   positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
-    // }
+    if (groupByState.waitingForPlayer.length > 0) {
+      groupByState.waitingForPlayer.forEach(c => c.waitPos = null); // limpa a posição
+      positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
+    }
 
-    if (groupByState.waiting.length > 0) positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
-    if (groupByState.waitingForPlayer.length > 0) positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
+    // if (groupByState.waiting.length > 0) positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
+    // if (groupByState.waitingForPlayer.length > 0) positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
     
     this.clients.forEach(client => client.update(this.player, this.cashier));
   }
   
   updatePaymentBox() {
-    if (this.paymentBox.checkCollision(this.player)) {
-      this.paymentBox.updateMovingMoneys(this.player);
-    }
+    this.paymentBox.updateMovingMoneys(this.player);
   }
 
   updateConstructionSpots() {
@@ -168,6 +167,30 @@ export default class GameManager {
         this.buildSpot(spot);
       }
     });
+  }
+
+  updateStockers() {
+    this.stockers.forEach(stocker => {
+      stocker.update(this.generators, this.boxes, this.garbage);
+      
+      if (stocker.checkCollisionWithPlayer(this.player) && stocker.state === "tired") {
+        stocker.state = "idle";
+        stocker.timerStamina = 2000;
+      }
+    });
+  }
+
+  updateCashier() {
+    if (!this.cashier) return;
+    this.cashier.update(this.paymentBox);
+  }
+
+  updateGarbage(deltaTime) {
+    if (this.garbage.checkCollision(this.player)) {
+      this.garbage.processPlayerInteraction(this.player, deltaTime);
+    } else {
+      this.garbage.resetCharge();
+    }
   }
   
   transferMoneyToSpot(spot) { 
@@ -250,30 +273,6 @@ export default class GameManager {
         stocker.drawHeight = 64;
         this.stockers.push(stocker);
         break;
-    }
-  }
-
-  updateStockers() {
-    this.stockers.forEach(stocker => {
-      stocker.update(this.generators, this.boxes, this.garbage);
-      
-      if (stocker.checkCollisionWithPlayer(this.player) && stocker.state === "tired") {
-        stocker.state = "idle";
-        stocker.timerStamina = 2000;
-      }
-    });
-  }
-
-  updateCashier() {
-    if (!this.cashier) return;
-    this.cashier.update(this.paymentBox);
-  }
-
-  updateGarbage(deltaTime) {
-    if (this.garbage.checkCollision(this.player)) {
-      this.garbage.processPlayerInteraction(this.player, deltaTime);
-    } else {
-      this.garbage.resetCharge();
     }
   }
   

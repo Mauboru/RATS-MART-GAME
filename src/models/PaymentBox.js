@@ -1,7 +1,7 @@
 import Money from "./Money";
 
 export default class PaymentBox {
-  constructor(x, y, width, height, moneyImg, img, maxMoneys = 50) {
+  constructor(x, y, width, height, moneyImg, img, maxMoneys = 1000) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -31,17 +31,16 @@ export default class PaymentBox {
   rebuildMoneyStack() {
     this.generatedMoneys = [];
   
-    const count = Math.min(this.money, this.maxMoneys);
+    const count = Math.min(this.money, this.maxMoneys); // ok
   
     for (let i = 0; i < count; i++) {
       const col = i % 3;
       const row = Math.floor(i / 3);
-  
       const offsetX = (col - 1) * 20;
       const offsetY = -row * 10;
   
       const newMoney = new Money(
-        this.x + this.width / 2 + offsetX - 16, 
+        this.x + this.width / 2 + offsetX - 16,
         this.y + offsetY,
         32,
         32,
@@ -53,75 +52,87 @@ export default class PaymentBox {
   }
 
   updateMovingMoneys(player) {
-    const BASE_COOLDOWN = 65; // Tempo inicial entre transferências
-    const MIN_COOLDOWN = 12;   // Tempo mínimo (máxima aceleração)
-    const ACCELERATION_RATE = 0.1; // Taxa de aceleração
+    const BASE_COOLDOWN = 65;
+    const MIN_COOLDOWN = 12;
+    const ACCELERATION_RATE = 0.1;
   
-    // Verifica colisão com o jogador
+    const now = Date.now();
+  
+    // Verifica colisão apenas para gerar novas moedas
     if (this.checkCollision(player) && this.money > 0) {
-      const now = Date.now();
+      if (!this.collisionStartTime) this.collisionStartTime = now;
   
-      // Inicia o temporizador de aceleração
-      if (!this.collisionStartTime) {
-        this.collisionStartTime = now;
-      }
-      
-      // Calcula duração da colisão em segundos
       const collisionDuration = (now - this.collisionStartTime) / 1000;
-      
-      // Calcula cooldown dinâmico (diminui com o tempo)
+  
       const dynamicCooldown = Math.max(
         MIN_COOLDOWN,
         BASE_COOLDOWN - (ACCELERATION_RATE * collisionDuration)
       );
   
-      // Verifica se pode transferir
       if (!this.lastTransferTime || now - this.lastTransferTime >= dynamicCooldown) {
         const moneyToTransfer = Math.min(1, this.money);
         this.money -= moneyToTransfer;
+  
+        const index = this.generatedMoneys.length;
+        const col = index % 3;
+        const row = Math.floor(index / 3);
+        const offsetX = (col - 1) * 20;
+        const offsetY = -row * 10;
         
-        // Cria moeda em movimento
+        const originX = this.x + this.width / 2 + offsetX - 16;
+        const originY = this.y + offsetY;
+        
         const newMoney = new Money(
-          this.x + this.width / 2 - 16,
-          this.y,
+          originX,
+          originY,
           32,
           32,
           this.moneyImg
         );
+        newMoney.origin = { x: originX, y: originY };
+        newMoney.target = 'player';
+  
         this.movingMoneys.push(newMoney);
-        
-        // Atualiza pilha visual
-        if (this.generatedMoneys.length > 0) {
-          this.generatedMoneys.pop();
-        }
-        
+  
+        if (this.generatedMoneys.length > 0) this.generatedMoneys.pop();
+  
         this.lastTransferTime = now;
       }
     } else {
-      // Reseta temporizadores quando não há colisão
       this.collisionStartTime = null;
       this.lastTransferTime = null;
     }
   
-    // Movimenta as moedas em direção ao jogador
+    // SEMPRE atualiza movimentação das moedas
     for (let i = this.movingMoneys.length - 1; i >= 0; i--) {
       const m = this.movingMoneys[i];
-      
-      const dx = player.x - m.x;
-      const dy = player.y - m.y;
+  
+      // Verifica se ainda deve ir pro jogador ou voltar pra pilha
+      if (this.checkCollision(player)) {
+        m.target = 'player';
+      } else {
+        m.target = 'pile';
+      }
+  
+      const target = m.target === 'player' ? player : m.origin;
+  
+      const dx = target.x - m.x;
+      const dy = target.y - m.y;
       const dist = Math.hypot(dx, dy);
   
-      // Ajusta velocidade baseada na distância (fica mais rápido perto do jogador)
-      const speed = Math.min(5, 2 + (dist * 0.1));
-      
+      const speed = Math.min(5, 2 + dist * 0.1);
+  
       if (dist > 1) {
         m.x += (dx / dist) * speed;
         m.y += (dy / dist) * speed;
       }
   
-      // Verifica colisão com jogador
-      if (player.checkCollision(m)) {
+      if (m.target === 'player' && player.checkCollision(m)) {
         player.money += 1;
+        this.movingMoneys.splice(i, 1);
+      } else if (m.target === 'pile' && dist < 2) {
+        this.money += 1;
+        this.generatedMoneys.push(m);
         this.movingMoneys.splice(i, 1);
       }
     }
