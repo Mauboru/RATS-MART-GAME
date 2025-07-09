@@ -81,7 +81,7 @@ export function GameCanvas({ assetPaths }) {
     });
 
     const canvas = canvasRef.current;
-    const loadedData = load('GameSave02');
+    const loadedData = load('GameSave02a');
     //localStorage.clear(); // remover isso depois
 
     const now = performance.now();
@@ -171,12 +171,20 @@ export function GameCanvas({ assetPaths }) {
       gameManager.boxes.forEach(box => {
         if (box.checkCollision(player) && player.items.length > 0 && box.items.length < 9) {
           const now = performance.now();
-          const lastItem = player.items[player.items.length - 1];
       
-          if (lastItem.type === box.type && now - lastTransferTimeRef.current > transferDelay) {
-            const item = player.items.pop();
-            box.addItem(item);
-            lastTransferTimeRef.current = now;
+          if (now - lastTransferTimeRef.current > transferDelay) {
+            const transferableItems = player.items.filter(item => item.type === box.type);
+      
+            while (box.items.length < 9 && transferableItems.length > 0) {
+              const item = transferableItems.shift();
+      
+              const index = player.items.indexOf(item);
+              if (index !== -1) {
+                player.items.splice(index, 1);
+                box.addItem(item);
+                lastTransferTimeRef.current = now;
+              }
+            }
           }
         }
       });
