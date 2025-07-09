@@ -404,7 +404,7 @@ export default class GameManager {
     }));
     
     save(
-      'GameSave02',
+      'GameSave03',
       this.player.money,
       this.player.x,
       this.player.y,

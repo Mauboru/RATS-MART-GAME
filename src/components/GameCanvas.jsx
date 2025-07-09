@@ -81,7 +81,7 @@ export function GameCanvas({ assetPaths }) {
     });
 
     const canvas = canvasRef.current;
-    const loadedData = load('GameSave02a');
+    const loadedData = load('GameSave03');
     //localStorage.clear(); // remover isso depois
 
     const now = performance.now();
