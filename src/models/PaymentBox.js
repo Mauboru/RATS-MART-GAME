@@ -191,6 +191,18 @@ export default class PaymentBox {
   draw(ctx, cameraX, cameraY) {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;
+
+    // 🟥 Desenha a caixa de colisão (debug)
+    const col = this.collisionRegion;
+    ctx.save();
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(
+      this.x + col.x - cameraX,
+      this.y + col.y - cameraY,
+      col.width,
+      col.height
+    );
   
     ctx.drawImage(this.img, drawX, drawY, this.width, this.height);
 
