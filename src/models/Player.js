@@ -1,5 +1,6 @@
 import Entidade from './Entidade';
 import { willCollide } from "../utils/collision";
+import { debugCollision } from "../utils/config";
 
 export default class Player extends Entidade {
   constructor(x, y, speed, spriteSheet, frameWidth, frameHeight) {
@@ -73,16 +74,18 @@ export default class Player extends Entidade {
     super.draw(ctx, cameraX, cameraY, row, this.items);
 
     // 🟥 Desenha a caixa de colisão (debug)
-    const col = this.collisionRegion;
-    ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(
-      this.x + col.x - cameraX,
-      this.y + col.y - cameraY,
-      col.width,
-      col.height
-    );
+    if (debugCollision) {
+      const col = this.collisionRegion;
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+      ctx.fillRect(
+        this.x + col.x - cameraX,
+        this.y + col.y - cameraY,
+        col.width,
+        col.height
+      );
+    }
     
     ctx.restore();
   }

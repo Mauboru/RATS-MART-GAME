@@ -1,4 +1,5 @@
 import Money from "./Money";
+import { debugCollision } from "../utils/config";
 
 export default class PaymentBox {
   constructor(x, y, width, height, moneyImg, img, maxMoneys = 1000) {
@@ -192,20 +193,22 @@ export default class PaymentBox {
     const drawX = this.x - cameraX;
     const drawY = this.y - cameraY;
 
-    // 🟥 Desenha a caixa de colisão (debug)
-    const col = this.collisionRegion;
-    ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(
-      this.x + col.x - cameraX,
-      this.y + col.y - cameraY,
-      col.width,
-      col.height
-    );
-  
     ctx.drawImage(this.img, drawX, drawY, this.width, this.height);
 
+    // 🟥 Desenha a caixa de colisão (debug)
+    if (debugCollision) {
+      const col = this.collisionRegion;
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+      ctx.fillRect(
+        this.x + col.x - cameraX,
+        this.y + col.y - cameraY,
+        col.width,
+        col.height
+      );
+    }
+  
     this.generatedMoneys.forEach(money => money.draw(ctx, cameraX, cameraY));
     this.movingMoneys.forEach(m => m.draw(ctx, cameraX, cameraY));
   }

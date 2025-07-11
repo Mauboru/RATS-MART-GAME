@@ -1,4 +1,5 @@
 import { Item } from '.';
+import { debugCollision } from "../utils/config";
 
 export default class ProcessingGenerator {
   constructor(x, y, width, height, sprite, inputType, outputType, inputNeeded, outputSprite) {
@@ -127,16 +128,19 @@ export default class ProcessingGenerator {
       );
     }
 
-    const col = this.collisionRegion;
-    ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(
-      this.x + col.x - cameraX,
-      this.y + col.y - cameraY,
-      col.width,
-      col.height
-    );
+    // 🟥 Desenha a caixa de colisão (debug)
+    if (debugCollision) {
+      const col = this.collisionRegion;
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+      ctx.fillRect(
+        this.x + col.x - cameraX,
+        this.y + col.y - cameraY,
+        col.width,
+        col.height
+      );
+    }
 
     if (this.isBroken) {
       ctx.fillStyle = 'red';
