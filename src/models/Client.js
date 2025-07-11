@@ -9,6 +9,7 @@ export default class Client extends Entidade {
     this.requiredItems = requiredItems;
 
     this.state = 'goingToBox';
+    this.queue = '';
     this.isDone = false;
     this.exitX = 0;
     this.exitY = 0;
@@ -33,13 +34,23 @@ export default class Client extends Entidade {
 
   update(player, cashier, currentTime = performance.now()) {
     if (this.state === 'goingToBox') {
+      this.queue = this.targetBox.type;
       this.moveTo(this.targetBox);
       if (this.checkCollision(this.targetBox)) {
         this.state = 'waiting';
       }
     } else if (this.state === 'waiting') {
-      if (this.waitPos) this.moveTo(this.waitPos);
-
+        if (this.waitPos) {
+          const dx = this.waitPos.x - this.x;
+          const dy = this.waitPos.y - this.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 2) {
+            this.moveTo(this.waitPos);
+          } else {
+            this.vx = 0;
+            this.vy = 0;
+          }
+        }
       if (
         this.targetBox.items.length > 0 &&
         this.items.length < this.requiredItems &&
@@ -98,5 +109,4 @@ export default class Client extends Entidade {
     ctx.strokeText(text, textX, textY);
     ctx.fillText(text, textX, textY);
   }
-  
 }

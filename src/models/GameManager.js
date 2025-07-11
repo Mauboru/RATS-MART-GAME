@@ -15,7 +15,7 @@ export default class GameManager {
     this.cashier = null;
     this.constructionSpots = [];
     this.worldSize = 2000;
-    this.maxClients = 5;
+    this.maxClients = 3;
     this.clientIntervals = [3000, 5000, 7000, 9000];
     this.clientSpawnTimeout = null;
     this.create = false;
@@ -23,8 +23,8 @@ export default class GameManager {
 
     this.spotGroupsToUnlock = [
       [1, 3],
-      [2],
       [0],
+      [2],
       [4],
       [5],
       [7, 6]
@@ -57,55 +57,59 @@ export default class GameManager {
 
   updateClients() {
     this.clients = this.clients.filter(client => !client.isDone);
-  
+
     const spacingMin = 24;
     const spacingMax = 40;
-  
+
     const groupByState = {
       waiting: [],
       waitingForPlayer: [],
     };
-  
+
     this.clients.forEach(client => {
       if (client.state === 'waiting') groupByState.waiting.push(client);
       if (client.state === 'waitingForPlayer') groupByState.waitingForPlayer.push(client);
     });
-  
+
     const positionQueue = (clients, box) => {
       if (clients.length === 0) return;
-    
+
       const firstClient = clients[0];
       const isRightSide = firstClient.x >= box.x;
-    
-      let cursorX = isRightSide ? box.x + box.width : box.x - spacingMin;
       const direction = isRightSide ? 1 : -1;
-    
+
+      let cursorX = isRightSide ? box.x + box.width : box.x - spacingMin;
+
       clients.forEach(client => {
         const offset = Math.floor(Math.random() * (spacingMax - spacingMin + 1)) + spacingMin;
-        if (!client.waitPos) {
-          client.waitPos = {
-            x: cursorX,
-            y: box.y + 32,
-          };
-        }
+
+        client.waitPos = {
+          x: cursorX,
+          y: box.y + 32,
+        };
+
         client.facing = isRightSide ? 'left' : 'right';
         cursorX += direction * offset;
       });
     };
-  
-    if (groupByState.waiting.length > 0) {
-      groupByState.waiting.forEach(c => c.waitPos = null); // limpa a posição
-      positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
-    }
-    
-    if (groupByState.waitingForPlayer.length > 0) {
-      groupByState.waitingForPlayer.forEach(c => c.waitPos = null); // limpa a posição
-      positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
-    }
 
-    // if (groupByState.waiting.length > 0) positionQueue(groupByState.waiting, groupByState.waiting[0].targetBox);
-    // if (groupByState.waitingForPlayer.length > 0) positionQueue(groupByState.waitingForPlayer, groupByState.waitingForPlayer[0].paymentBox);
-    
+    const groupAndPositionByQueue = (clients, boxPropName) => {
+      const grouped = {};
+      clients.forEach(c => {
+        const key = c.queue || c[boxPropName]?.type;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(c);
+      });
+
+      Object.values(grouped).forEach(group => {
+        const refBox = group[0][boxPropName];
+        positionQueue(group, refBox);
+      });
+    };
+
+    groupAndPositionByQueue(groupByState.waiting, 'targetBox');
+    groupAndPositionByQueue(groupByState.waitingForPlayer, 'paymentBox');
+
     this.clients.forEach(client => client.update(this.player, this.cashier));
   }
   
@@ -307,7 +311,7 @@ export default class GameManager {
       this.paymentBox.rebuildMoneyStack();
     }
 
-    this.garbage = new Garbage(250, 125, 64, 64, this.assets.garbageImg);
+    this.garbage = new Garbage(120, 125, 64, 64, this.assets.garbageImg);
     this.constructionSpots = this.createConstructionSpots(loadedData);
   }
 
@@ -334,7 +338,7 @@ export default class GameManager {
       new ConstructionSpot(300, 200, 64, 64, 100, this.assets.spotImage, 1, false), // bananeira
       new ConstructionSpot(220, 200, 64, 64, 50, this.assets.spotImage, 6, false), // macieira
       new ConstructionSpot(220, 420, 64, 64, 100, this.assets.spotImage, 2, false), // caixa de banana
-      new ConstructionSpot(300, 420, 64, 64, 50, this.assets.spotImage, 5, false), // caixa de maças
+      new ConstructionSpot(330, 480, 64, 64, 50, this.assets.spotImage, 5, false), // caixa de maças
       new ConstructionSpot(55, 420, 64, 64, 200, this.assets.spotImage, 3, false), // caixa
       new ConstructionSpot(55, 220, 64, 64, 250, this.assets.spotImage, 4, false), // estoquista
       new ConstructionSpot(220, 720, 64, 64, 300, this.assets.spotImage, 7, false), // gerador de sucos

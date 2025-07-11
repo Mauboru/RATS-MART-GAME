@@ -56,33 +56,27 @@ export default class PaymentBox {
     const BASE_COOLDOWN = 65;
     const MIN_COOLDOWN = 12;
     const ACCELERATION_RATE = 0.1;
-  
+
     const now = Date.now();
-  
-    // Verifica colisão apenas para gerar novas moedas
+
+    // Geração de nova moeda
     if (this.checkCollision(player) && this.money > 0) {
       if (!this.collisionStartTime) this.collisionStartTime = now;
-  
+
       const collisionDuration = (now - this.collisionStartTime) / 1000;
-  
+
       const dynamicCooldown = Math.max(
         MIN_COOLDOWN,
         BASE_COOLDOWN - (ACCELERATION_RATE * collisionDuration)
       );
-  
+
       if (!this.lastTransferTime || now - this.lastTransferTime >= dynamicCooldown) {
         const moneyToTransfer = Math.min(1, this.money);
         this.money -= moneyToTransfer;
-  
-        const index = this.generatedMoneys.length;
-        const col = index % 3;
-        const row = Math.floor(index / 3);
-        const offsetX = (col - 1) * 20;
-        const offsetY = -row * 10;
-        
-        const originX = this.x + this.width / 2 + offsetX - 16;
-        const originY = this.y + offsetY;
-        
+
+        const originX = this.x + this.width / 2 - 16; // Centralizado
+        const originY = this.y;    // Levemente acima da base
+
         const newMoney = new Money(
           originX,
           originY,
@@ -92,42 +86,44 @@ export default class PaymentBox {
         );
         newMoney.origin = { x: originX, y: originY };
         newMoney.target = 'player';
-  
+
         this.movingMoneys.push(newMoney);
-  
+
         if (this.generatedMoneys.length > 0) this.generatedMoneys.pop();
-  
+
         this.lastTransferTime = now;
       }
     } else {
       this.collisionStartTime = null;
       this.lastTransferTime = null;
     }
-  
-    // SEMPRE atualiza movimentação das moedas
+
+    // Movimento das moedas
     for (let i = this.movingMoneys.length - 1; i >= 0; i--) {
       const m = this.movingMoneys[i];
-  
-      // Verifica se ainda deve ir pro jogador ou voltar pra pilha
-      if (this.checkCollision(player)) {
-        m.target = 'player';
-      } else {
-        m.target = 'pile';
+
+      // NÃO altera o target se já estiver indo pro player
+      if (m.target !== 'player') {
+        if (this.checkCollision(player)) {
+          m.target = 'player';
+        } else {
+          m.target = 'pile';
+        }
       }
-  
+
       const target = m.target === 'player' ? player : m.origin;
-  
+
       const dx = target.x - m.x;
       const dy = target.y - m.y;
       const dist = Math.hypot(dx, dy);
-  
+
       const speed = Math.min(5, 2 + dist * 0.1);
-  
+
       if (dist > 1) {
         m.x += (dx / dist) * speed;
         m.y += (dy / dist) * speed;
       }
-  
+
       if (m.target === 'player' && player.checkCollision(m)) {
         player.money += 1;
         this.movingMoneys.splice(i, 1);
