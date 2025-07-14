@@ -19,6 +19,8 @@ export default class Stocker extends Entidade {
         this.boxTarget = null;
         this.maxItems = 3;
         this.items = [];
+
+        this.itemType = '';
     }
 
     update(generators, boxes, garbage) {
@@ -49,6 +51,7 @@ export default class Stocker extends Entidade {
 
             case 'collecting':
                 if (this.generatorTarget.hasItem() && this.items.length < this.maxItems) {
+                    this.itemType = this.generatorTarget.type;
                     const item = this.generatorTarget.takeItem();
                     if (item) this.items.push(item);
 
@@ -68,13 +71,11 @@ export default class Stocker extends Entidade {
                 break;
 
             case 'depositing':
-                if (this.boxTarget && !this.boxTarget.isFull() && this.items.length > 0) {
+                if (this.boxTarget && !this.boxTarget.isFull() && this.items.length > 0 && this.itemType === this.boxTarget.type) {
                     const item = this.items.pop();
                     this.boxTarget.addItem(item);
 
-                    if (this.items.length <= 0) {
-                        this.chooseGenerator(generators);
-                    }
+                    if (this.items.length <= 0) this.chooseGenerator(generators);
                 } else {
                     const otherBox = this.findOtherBox(boxes);
                     if (otherBox) {
@@ -151,13 +152,13 @@ export default class Stocker extends Entidade {
     }
       
     chooseBox(boxes) {
-    const box = boxes.find(b => !b.isFull());
-    if (box) {
-        this.boxTarget = box;
-        this.state = 'movingToBox';
-    } else {
-        this.state = 'movingToGarbage';
-    }
+        const box = boxes.find(b => !b.isFull() && b.type === this.itemType);
+        if (box) {
+            this.boxTarget = box;
+            this.state = 'movingToBox';
+        } else {
+            this.state = 'movingToGarbage';
+        }
     }
 
     hasAvailableBox(boxes) {
@@ -185,7 +186,7 @@ export default class Stocker extends Entidade {
         } else {
           this.direction = { x: 0, y: 0 };
         }
-      }
+    } 
 
     isAtTarget(target, buffer = 10) {
         return Math.hypot(target.x - this.x, target.y - this.y) < buffer;
