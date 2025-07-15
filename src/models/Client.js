@@ -20,6 +20,8 @@ export default class Client extends Entidade {
 
     this.collectDelay = 300;
     this.lastCollectTime = 0;
+
+    this.currentCollector = null;
   }
 
   checkCollisionWith(entidade) {
@@ -44,22 +46,27 @@ export default class Client extends Entidade {
           const dx = this.waitPos.x - this.x;
           const dy = this.waitPos.y - this.y;
           const dist = Math.hypot(dx, dy);
-          if (dist > 2) {
+          if (dist > 20) {
             this.moveTo(this.waitPos);
           } else {
             this.vx = 0;
             this.vy = 0;
           }
         }
-      if (
-        this.targetBox.items.length > 0 &&
-        this.items.length < this.requiredItems &&
-        currentTime - this.lastCollectTime > this.collectDelay
-      ) {
-        const item = this.targetBox.items.pop();
-        this.items.push(item);
-        this.lastCollectTime = currentTime;
-      }
+        if (!this.targetBox.currentCollector || this.targetBox.currentCollector === this) {
+          this.targetBox.currentCollector = this;
+
+          if (this.targetBox.items.length > 0 && this.items.length < this.requiredItems && currentTime - this.lastCollectTime > this.collectDelay) {
+            const item = this.targetBox.items.pop();
+            this.items.push(item);
+            this.lastCollectTime = currentTime;
+          }
+
+          if (this.items.length >= this.requiredItems) {
+            this.targetBox.currentCollector = null;
+            this.state = 'goingToPayment';
+          }
+        }
       if (this.items.length >= this.requiredItems) {
         this.state = 'goingToPayment';
       }
