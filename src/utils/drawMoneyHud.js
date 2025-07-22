@@ -22,7 +22,9 @@ export function drawMoneyHud(ctx, money, gems, canvasWidth) {
   ctx.fillText(`${gems}`, startX + iconSize * 2 + 60, startY - 6);
 }
 
-export function drawActionButton(ctx, icon, x, y, size) {
-    ctx.drawImage(icon, x, y, size, size);
+export function drawActionButton(ctx, icon, x, y, width, height) {
+  ctx.save();
+  ctx.drawImage(icon, x, y, width, height);
+  ctx.restore();
 }
   
