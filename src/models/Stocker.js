@@ -36,7 +36,7 @@ export default class Stocker extends Entidade {
         switch (this.state) {
             case 'idle':
                 if (this.hasAvailableBox(boxes)) {
-                    this.chooseGenerator(generators);
+                    this.chooseGenerator(generators, boxes);
                 } else {
                     this.state = 'waiting';
                 }
@@ -75,7 +75,7 @@ export default class Stocker extends Entidade {
                     const item = this.items.pop();
                     this.boxTarget.addItem(item);
 
-                    if (this.items.length <= 0) this.chooseGenerator(generators);
+                    if (this.items.length <= 0) this.chooseGenerator(generators, boxes);
                 } else {
                     const otherBox = this.findOtherBox(boxes);
                     if (otherBox) {
@@ -98,7 +98,7 @@ export default class Stocker extends Entidade {
                     }
                 } else {
                     if (this.hasAvailableBox(boxes)) {
-                        this.chooseGenerator(generators);
+                        this.chooseGenerator(generators, boxes);
                     }
                 }
                 break;
@@ -117,7 +117,7 @@ export default class Stocker extends Entidade {
 
                 if (this.items.length <= 0) {
                     if (this.hasAvailableBox(boxes)) {
-                        this.chooseGenerator(generators);
+                        this.chooseGenerator(generators, boxes);
                     } else {
                         this.state = 'waiting';
                     }
@@ -141,16 +141,26 @@ export default class Stocker extends Entidade {
         );
     }
 
-    chooseGenerator(generators) {
+    chooseGenerator(generators, boxes) {
         if (generators.length === 0) {
-          this.state = 'waiting';
-          return;
+            this.state = 'waiting';
+            return;
         }
-        
-        this.generatorTarget = generators.find(g => g.hasItem()) || generators[0];
-        this.state = 'movingToGenerator';
+
+        for (const gen of generators) {
+            if (gen.hasItem()) {
+                const box = boxes.find(b => b.type === gen.type && !b.isFull());
+                if (box) {
+                    this.generatorTarget = gen;
+                    this.state = 'movingToGenerator';
+                    return;
+                }
+            }
+        }
+
+        this.state = 'waiting';
     }
-      
+
     chooseBox(boxes) {
         const box = boxes.find(b => !b.isFull() && b.type === this.itemType);
         if (box) {
@@ -166,7 +176,11 @@ export default class Stocker extends Entidade {
     }
 
     findOtherBox(boxes) {
-        return boxes.find(b => b !== this.boxTarget && !b.isFull());
+        return boxes.find(b => 
+            b !== this.boxTarget &&
+            !b.isFull() &&
+            b.type === this.itemType
+        );
     }
 
     moveTo(target) {
@@ -210,6 +224,18 @@ export default class Stocker extends Entidade {
                 row = 1;
                 break;
         }
+
+        // const text = `${this.state}`;
+        // ctx.font = '14px Arial';
+        // ctx.fillStyle = 'white';
+        // ctx.strokeStyle = 'black';
+        // ctx.lineWidth = 2;
+    
+        // const textX = this.x - cameraX + this.drawWidth / 2;
+        // const textY = this.y - cameraY + this.drawHeight + 10;
+    
+        // ctx.strokeText(text, textX, textY);
+        // ctx.fillText(text, textX, textY);
 
         super.draw(ctx, cameraX, cameraY, row, this.items);
     }

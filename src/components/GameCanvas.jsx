@@ -53,7 +53,8 @@ export function GameCanvas({ assetPaths }) {
     const tryPlayMusic = () => {
       if (music && music.paused) {
         music.loop = true;
-        music.volume = 0.3;
+        // music.volume = 0.3;
+        music.volume = 0;
         music.play().catch((err) => {
           console.warn('Erro ao tocar música:', err);
         });

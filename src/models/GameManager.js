@@ -344,14 +344,14 @@ export default class GameManager {
       new ConstructionSpot(220, 720, 64, 64, 300, this.assets.spotImage, 7, false), // gerador de sucos
       new ConstructionSpot(420, 620, 64, 64, 350, this.assets.spotImage, 8, false), // caixa de sucos
 
-      // new ConstructionSpot(300, 200, 64, 64, 1, this.assets.spotImage, 1, false), // bananeira
-      // new ConstructionSpot(220, 200, 64, 64, 5, this.assets.spotImage, 6, false), // macieira
-      // new ConstructionSpot(220, 420, 64, 64, 1, this.assets.spotImage, 2, false), // caixa de banana
-      // new ConstructionSpot(300, 420, 64, 64, 5, this.assets.spotImage, 5, false), // caixa de maças
-      // new ConstructionSpot(55, 420, 64, 64, 2, this.assets.spotImage, 3, false), // caixa
-      // new ConstructionSpot(55, 220, 64, 64, 2, this.assets.spotImage, 4, false), // estoquista
-      // new ConstructionSpot(220, 720, 64, 64, 3, this.assets.spotImage, 7, false), // gerador de sucos
-      // new ConstructionSpot(420, 620, 64, 64, 3, this.assets.spotImage, 8, false), // caixa de sucos
+      // new ConstructionSpot(300, 200, 64, 64, 0, this.assets.spotImage, 1, false), // bananeira
+      // new ConstructionSpot(220, 200, 64, 64, 0, this.assets.spotImage, 6, false), // macieira
+      // new ConstructionSpot(220, 420, 64, 64, 0, this.assets.spotImage, 2, false), // caixa de banana
+      // new ConstructionSpot(300, 420, 64, 64, 0, this.assets.spotImage, 5, false), // caixa de maças
+      // new ConstructionSpot(55, 420, 64, 64, 0, this.assets.spotImage, 3, false), // caixa
+      // new ConstructionSpot(55, 220, 64, 64, 0, this.assets.spotImage, 4, false), // estoquista
+      // new ConstructionSpot(220, 720, 64, 64, 0, this.assets.spotImage, 7, false), // gerador de sucos
+      // new ConstructionSpot(420, 620, 64, 64, 0, this.assets.spotImage, 8, false), // caixa de sucos
     ];
   }
 
