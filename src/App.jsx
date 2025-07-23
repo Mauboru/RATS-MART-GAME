@@ -5,7 +5,7 @@ export default function App() {
     backgroundImg: './background.png',
     playerImg01: './player.png',
     generatorImg: './generator.png',
-    itemImg: './item.png',
+    itemImg: './maca.png',
     arvoreBananaImg: './arvoreBanana.png',
     bananaImg: './banana.png',
     spotImage: './spot.png',
@@ -20,7 +20,7 @@ export default function App() {
     bananaBoxImg: './boxBanana.png',
 
     juiceMachineImg: './juiceMachine.png',
-    sucoImg: './juice.png',
+    sucoImg: './suco.png',
 
     // NOVOS SONS:
     backgroundMusic: './sounds/music.mp3',

@@ -367,21 +367,36 @@ export default class GameManager {
         this.clientSpawnTimeout = setTimeout(spawnClient, delay);
         return;
       }
+
+      const allTypes = ['suco', 'maca', 'banana'];
+      const shuffled = allTypes.sort(() => Math.random() - 0.5);
+      const itemCount = Math.floor(Math.random() * 2) + 1; // 1 ou 2 tipos
+      const requiredItems = shuffled.slice(0, itemCount).map(type => ({
+        type,
+        amount: Math.floor(Math.random() * 2) + 1 // 1 ou 2 unidades
+      }));
   
       const newMaxClients = this.maxClients * this.boxes.length;
       if (this.clients.length < newMaxClients) {
-        const targetBox = this.boxes[Math.floor(Math.random() * this.boxes.length)];
+        const firstItem = requiredItems[0];
+        const targetBox = this.boxes.find(b => b.type === firstItem.type);
+        if (!targetBox) {
+          this.clientSpawnTimeout = setTimeout(spawnClient, delay);
+          return;
+        }
         const client = new Client(
           0, 0, 1.2,
           targetBox,
           this.paymentBox,
-          Math.floor(Math.random() * 3) + 1,
+          requiredItems,
           this.assets.clientImg,
-          32, 32
+          32, 32,
+          this
         );
   
         client.drawWidth = 64;
         client.drawHeight = 64;
+        client.gameManager = this;
         this.clients.push(client);
       }
   

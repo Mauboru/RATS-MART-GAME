@@ -74,6 +74,13 @@ export function GameCanvas({ assetPaths }) {
   useEffect(() => {
     if (!loaded) return;
 
+    // Monta os ícones usados pelos clientes
+    assets.icons = {
+      suco: assets.sucoImg,
+      maca: assets.itemImg,
+      banana: assets.bananaImg,
+    };
+
     const music = assets.backgroundMusic;
     music.loop = true;
     music.volume = 0.3;
