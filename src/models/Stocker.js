@@ -215,13 +215,22 @@ export default class Stocker extends Entidade {
 
         switch (this.state) {
             case 'idle':
-                row = 0;
+                row = 3;
                 break;
             case 'tired':
                 row = 2;
                 break;
-            default:
+            case 'waiting':
+                row = 0;
+                break;
+            case 'movingToBox':
                 row = 1;
+                break;
+            case 'movingToGenerator':
+                if (this.items.length > 0) row = 1;
+                break;
+            default:
+                row = 0;
                 break;
         }
 
@@ -231,7 +240,7 @@ export default class Stocker extends Entidade {
         // ctx.strokeStyle = 'black';
         // ctx.lineWidth = 2;
     
-        // const textX = this.x - cameraX + this.drawWidth / 2;
+        // const textX = this.x - cameraX + 35;
         // const textY = this.y - cameraY + this.drawHeight + 10;
     
         // ctx.strokeText(text, textX, textY);
