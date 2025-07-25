@@ -11,9 +11,10 @@ export default function App() {
     spotImage: './spot.png',
     paymentBoxImage: './paymentBox.png',
     moneyImg: './sprites/UI/coin.png',
+    
     clientImg: './client.png',
     cashierImg: './cashier.png',
-    stockerImg: './stocker.png',
+    stockerImg: './stocker-v1.png',
     garbageImg: './garbage.png',
 
     boxImg: './box.png',
